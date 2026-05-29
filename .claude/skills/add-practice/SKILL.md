@@ -1,7 +1,6 @@
 ---
 name: add-practice
 description: Add a new best practice entry to the BP knowledge base
-model: haiku
 ---
 
 You are adding a new entry to the BP best practices knowledge base at `C:\Github\BP`.
