@@ -22,7 +22,7 @@ From tech-assistant (`CLAUDE.md`):
 automation -- before writing a single line -- fetch the LL-G index
 and load relevant entries.**
 
-Step 1: Fetch https://raw.githubusercontent.com/wellforce-brandon/LL-G/main/llms.txt
+Step 1: Fetch https://raw.githubusercontent.com/BoardPandas/LL-G/main/llms.txt
 Step 2: For each technology you will use, fetch its sub-index
 Step 3: Read ALL HIGH-severity entries for those technologies
 Step 4: Read any MEDIUM entry whose title matches your specific task
