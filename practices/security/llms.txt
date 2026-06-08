@@ -1,7 +1,8 @@
 # Security Best Practices
 
-> Proven patterns for tenant data isolation, time-bound access, and audit trails in multi-tenant SaaS.
+> Proven patterns for tenant data isolation, time-bound access, audit trails, and authentication in multi-tenant SaaS.
 
 ## Entries
 
 - [Customer-Controlled Support Access for Multi-Tenant SaaS](customer-controlled-support-access.md): Platform staff have zero default access to tenant data. Tenant admins issue time-bound, scope-bounded grants. Standard, break-glass, and Legal Hold workflows. SOC 2 + GDPR aligned. FOUNDATIONAL.
+- [Host MCP Servers as RFC 9728/8707 OAuth 2.1 Resource Servers (Better Auth)](mcp-oauth2-resource-server.md): Per-resource protected-resource metadata + audience binding, local JWKS verification, and @better-auth/oauth-provider + jwt() over the deprecated mcp() plugin. RECOMMENDED.
