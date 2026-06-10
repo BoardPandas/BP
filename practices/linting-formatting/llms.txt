@@ -6,3 +6,4 @@
 
 - [Biome as Unified Linter and Formatter](biome-replacing-eslint.md): Single Rust-based tool replacing ESLint + Prettier for linting, formatting, and import sorting. RECOMMENDED.
 - [Auto-Format on Write via PostToolUse Hook](auto-format-on-write-hook.md): Claude Code hook that auto-formats files after every edit or write. RECOMMENDED.
+- [Ratchet Quality Limits with a Grandfather Baseline](ratchet-quality-limits-grandfather-baseline.md): Retrofit limits onto existing codebases by snapshotting violators into a committed baseline; new violations and baseline growth fail, shrinkage is rewarded, and additions to silence failures are forbidden. RECOMMENDED.
