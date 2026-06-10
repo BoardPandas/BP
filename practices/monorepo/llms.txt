@@ -6,3 +6,4 @@
 
 - [pnpm + Turborepo Monorepo Structure](pnpm-turborepo-structure.md): pnpm workspaces for packages, Turborepo for task orchestration, layered dependency hierarchy. RECOMMENDED.
 - [Shared Packages with Barrel Exports and Layer Dependencies](shared-packages-pattern.md): @namespace/ prefixed packages with barrel exports and numbered layer enforcement. RECOMMENDED.
+- [workspace:* Dependencies + TS Project References over Relative dist/ Imports](workspace-deps-over-relative-dist-imports.md): Declare cross-package deps as workspace:* with exports maps and tsc --build project references instead of importing ../../../pkg/dist/ paths -- eliminates the stale-dist "my change did nothing" failure class. RECOMMENDED.
