@@ -11,13 +11,13 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 ## Concerns
 
 ### Claude Configuration
-- [Claude Config index](practices/claude-config/llms.txt): CLAUDE.md structure, rules, hooks, skills, agents (5 entries)
+- [Claude Config index](practices/claude-config/llms.txt): CLAUDE.md structure, rules, hooks, skills, agents (8 entries)
 
 ### Testing
 - [Testing index](practices/testing/llms.txt): Vitest, Jest, Playwright, coverage patterns (2 entries)
 
 ### Linting & Formatting
-- [Linting & Formatting index](practices/linting-formatting/llms.txt): Biome, ESLint, auto-format hooks (2 entries)
+- [Linting & Formatting index](practices/linting-formatting/llms.txt): Biome, ESLint, auto-format hooks (3 entries)
 
 ### Error Handling
 - [Error Handling index](practices/error-handling/llms.txt): Structured logging, error context propagation (2 entries)
