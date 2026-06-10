@@ -1,0 +1,7 @@
+# Dependencies Best Practices
+
+> Proven patterns for dependency hygiene, vulnerability gating, and supply-chain risk reduction.
+
+## Entries
+
+- [Gate CI on npm audit --omit=dev and Remove Unused Dependencies Carrying Advisories](npm-audit-prod-ci-prune-unused.md): Fail CI on high/critical prod-tree advisories; when one lands, grep for actual usage first and delete unused packages instead of overriding. FOUNDATIONAL.
