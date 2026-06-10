@@ -5,3 +5,4 @@
 ## Entries
 
 - [Drizzle-Kit `--custom` Workflow for Data Backfill + NOT NULL Flip](drizzle-custom-backfill-flow.md): Schema-first, then `--custom` stub, then hand-written backfill + NOT NULL ALTER in dependency order; verify journal `when` monotonicity. RECOMMENDED.
+- [Never Renumber Applied Migrations](never-renumber-applied-migrations.md): Applied migration filenames are immutable history; document duplicate prefixes in a README and adopt a strict next-number convention instead of renaming. FOUNDATIONAL.
