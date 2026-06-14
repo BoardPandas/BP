@@ -1,0 +1,7 @@
+# LLM Resilience Best Practices
+
+> Proven patterns for calling LLMs reliably from application code: tolerating non-strict JSON output, retry policies tuned to the failure mode, and failing closed when a verification or extraction step cannot complete.
+
+## Entries
+
+- [Robustly parse non-strict LLM JSON with parse-only retry and fail-closed fallback](llm-json-parse-retry-fail-closed.md): Defensive parse ladder (direct parse, then unfence, then a string-aware balanced-brace scan, then a first/last-brace slice), reject non-object JSON, retry ONCE on a parse failure but never on a timeout/transport error, and fail closed by degrading safely. RECOMMENDED.

@@ -22,6 +22,9 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 ### Error Handling
 - [Error Handling index](practices/error-handling/llms.txt): Structured logging, error context propagation (2 entries)
 
+### LLM Resilience
+- [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification (1 entry)
+
 ### Deployment
 - [Deployment index](practices/deployment/llms.txt): Docker multi-stage, Cloudflare, Northflank, Doppler (7 entries)
 
