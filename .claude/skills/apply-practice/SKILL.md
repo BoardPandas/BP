@@ -1,21 +1,51 @@
 ---
 name: apply-practice
-description: Apply a specific best practice from BP to a target repository
+model: sonnet
+effort: medium
+description: Apply a specific best practice from the BP knowledge base to a target repository. Use this whenever the user says "apply a practice", "apply <slug> to this repo", "adopt the BP pattern for X", "bring this repo up to the BP standard", or wants a proven convention/config/workflow from BP installed into the current project -- even if they don't say "BP" explicitly.
+user-invocable: true
+argument-hint: (optional) the practice slug (e.g. testing/vitest-monorepo-config) and/or target repo path
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Bash
+  - Edit
+  - Write
+  - WebFetch
 ---
 
 You are applying a specific best practice from the BP knowledge base to a target repository.
+
+**Repository:** `BoardPandas/BP` on GitHub
+**Raw URL base:** `https://raw.githubusercontent.com/BoardPandas/BP/main/`
 
 ## Step 1: Identify inputs
 
 You need two things:
 1. **Practice slug** -- e.g., `testing/vitest-monorepo-config` or `safety/read-only-first-rule`
-2. **Target repo** -- e.g., `60k-mono` (assumes `C:\Github\<repo-name>`)
+2. **Target repo** -- the local repository to apply the practice to (current working directory by default, or ask the user)
 
 Ask the user for any missing inputs.
 
-## Step 2: Load the practice
+## Step 2: Load the practice from GitHub
 
-Read `C:\Github\BP\practices\<concern>\<slug>.md` to get the full practice entry.
+This skill only reads from BP -- use `WebFetch` on the raw URL. Don't switch to the GitHub MCP server even if one is connected: a raw `WebFetch` is a plain read, and pulling in MCP tool schemas mid-skill bloats the context window for no benefit.
+
+Fetch the practice entry:
+```
+WebFetch https://raw.githubusercontent.com/BoardPandas/BP/main/practices/<concern>/<slug>.md
+```
+
+If the user doesn't know the exact slug, fetch the concern index first to show available practices:
+```
+WebFetch https://raw.githubusercontent.com/BoardPandas/BP/main/practices/<concern>/llms.txt
+```
+
+Or fetch the master index to show all concerns:
+```
+WebFetch https://raw.githubusercontent.com/BoardPandas/BP/main/llms.txt
+```
 
 ## Step 3: Run CHECK steps
 
