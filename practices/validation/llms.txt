@@ -1,0 +1,7 @@
+# Validation Best Practices
+
+> Proven patterns for designing validators, graders, scanners, and checkers -- especially around what a result can and cannot prove.
+
+## Entries
+
+- [A presence-checking validator is a floor, not a ceiling](presence-check-validator-is-a-floor.md): A validator that detects PRESENCE of known markers proves "at least severity X," never "at most X" or "clean." Make verdict adjustments monotonic in the safe direction (raise, never lower) and phrase absence as "unverified," not "clean." FOUNDATIONAL.
