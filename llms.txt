@@ -25,6 +25,9 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 ### LLM Resilience
 - [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification (1 entry)
 
+### Validation
+- [Validation index](practices/validation/llms.txt): Validator/grader/scanner design -- what a result can and cannot prove; floor-not-ceiling, monotonic verdict adjustment (1 entry)
+
 ### Deployment
 - [Deployment index](practices/deployment/llms.txt): Docker multi-stage, Cloudflare, Northflank, Doppler (7 entries)
 
