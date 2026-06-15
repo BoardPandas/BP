@@ -5,3 +5,4 @@
 ## Entries
 
 - [Robustly parse non-strict LLM JSON with parse-only retry and fail-closed fallback](llm-json-parse-retry-fail-closed.md): Defensive parse ladder (direct parse, then unfence, then a string-aware balanced-brace scan, then a first/last-brace slice), reject non-object JSON, retry ONCE on a parse failure but never on a timeout/transport error, and fail closed by degrading safely. RECOMMENDED.
+- [Reconcile LLM self-assessments against deterministic checks directionally](reconcile-llm-self-assessment-directionally.md): When an LLM's self-graded verdict disagrees with a deterministic check, handle the two directions asymmetrically -- below the floor = understated (raise it), above the floor = plausible-but-unverified (keep it, don't stomp). Store the deterministic value as the defensible anchor. RECOMMENDED.
