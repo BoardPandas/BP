@@ -23,7 +23,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Error Handling index](practices/error-handling/llms.txt): Structured logging, error context propagation (2 entries)
 
 ### LLM Resilience
-- [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification, directional reconciliation of LLM self-assessments vs deterministic checks (2 entries)
+- [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification, directional reconciliation of LLM self-assessments vs deterministic checks, depth-scaled output budgets + truncated-JSON salvage (3 entries)
 
 ### Validation
 - [Validation index](practices/validation/llms.txt): Validator/grader/scanner design -- what a result can and cannot prove; floor-not-ceiling, monotonic verdict adjustment (1 entry)
