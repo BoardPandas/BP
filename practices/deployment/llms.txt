@@ -12,3 +12,4 @@
 
 - [Two-endpoint Stripe webhook routing with composite-key idempotency](two-endpoint-stripe-webhook-idempotency.md): Separate platform vs Connect endpoints with distinct signing secrets, deduped via `(stripe_event_id, endpoint_source)` unique key + INSERT ON CONFLICT DO NOTHING. RECOMMENDED.
 - [Encode tenant ID in OAuth `state` for single-redirect-URI flows](oauth-state-tenant-encoding.md): Stripe Connect, GitHub Apps, Slack OAuth all enforce single-URI registration. Combine tenant ID + CSRF nonce in `state`; re-verify role on callback. RECOMMENDED.
+- [Wire Workbox's generateSW into the existing build script; never auto-activate](workbox-sw-wired-into-existing-build.md): Chain `generateSW()` onto the existing build command (not a separate manual step); `skipWaiting:false`/`clientsClaim:false` so a deploy never yanks state out from under a live session; exclude API routes from `runtimeCaching`; gitignore the deterministic generated output. RECOMMENDED.
