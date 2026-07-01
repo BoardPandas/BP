@@ -56,7 +56,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Security index](practices/security/llms.txt): Tenant data isolation, customer-controlled support access, audit trails, OAuth 2.1 / MCP resource-server hardening, key rotation, tenant 404s, internal loopback bridge (5 entries)
 
 ### Database
-- [Database index](practices/database/llms.txt): Drizzle migrations, Postgres patterns, migration numbering discipline (2 entries)
+- [Database index](practices/database/llms.txt): Drizzle migrations, Postgres patterns, migration numbering discipline (3 entries)
 
 ### Dependencies
 - [Dependencies index](practices/dependencies/llms.txt): npm audit CI gating, unused-dependency pruning, supply-chain hygiene (1 entry)

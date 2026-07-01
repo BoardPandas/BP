@@ -6,3 +6,4 @@
 
 - [Drizzle-Kit `--custom` Workflow for Data Backfill + NOT NULL Flip](drizzle-custom-backfill-flow.md): Schema-first, then `--custom` stub, then hand-written backfill + NOT NULL ALTER in dependency order; verify journal `when` monotonicity. RECOMMENDED.
 - [Never Renumber Applied Migrations](never-renumber-applied-migrations.md): Applied migration filenames are immutable history; document duplicate prefixes in a README and adopt a strict next-number convention instead of renaming. FOUNDATIONAL.
+- [Export Synchronous sqlite Helpers Alongside Async-Wrapped Store Methods](sync-sqlite-transactions-in-async-stores.md): better-sqlite3's `db.transaction()` requires a synchronous callback -- calling a store's `async`-wrapped methods from inside one lets COMMIT fire before awaited work completes, silently breaking atomicity. Export plain sync functions the async methods thinly wrap, and call those directly in multi-table transactions. RECOMMENDED.
