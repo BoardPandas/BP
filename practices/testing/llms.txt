@@ -6,3 +6,6 @@
 
 - [Vitest Configuration for Monorepos](vitest-monorepo-config.md): Per-package Vitest configs with Turborepo orchestration. RECOMMENDED.
 - [Playwright E2E Testing](playwright-e2e.md): Cross-browser E2E testing with auto-start dev server. OPTIONAL.
+- [Split side-effect-free data out of a module that mutates the DOM at import time](browser-side-effect-free-data-extraction.md): extract a pure data constant into its own module when its current home also runs document/window-touching bootstrap code at import time, so a Node/vitest test can import the data without crashing on a missing DOM. RECOMMENDED.
+- [Use a dynamic await import() inside beforeAll, not a static import, when a test sets an env var to override a module's load-time config](dynamic-import-for-env-override-hermetic-tests.md): static imports are hoisted above a test file's own process.env assignment, so the module-under-test silently captures the wrong config; loading it dynamically inside beforeAll fixes it. RECOMMENDED.
+- [Verify prod-only static UI pre-deploy with a scratchpad harness server + DevTools emulation](static-harness-server-for-prod-only-ui.md): a throwaway no-dep static server rooted at the app's public dir plus a scratchpad harness page mounting the real modules with worst-case fake state, measured numerically under true device emulation. RECOMMENDED.
