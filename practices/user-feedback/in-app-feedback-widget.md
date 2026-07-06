@@ -11,7 +11,10 @@ applies-to: [nextjs, react]
 
 Ship a "Send feedback" button in every authenticated app. Users pick a category and severity, write a message, optionally attach or paste a screenshot, and submit. The server opens a labeled GitHub issue in a private triage repo, enriched with page context, user identity, and silently captured browser diagnostics (recent console errors, failed network requests, click/navigation breadcrumbs, session-replay links, runtime health).
 
-This is not a description to reimplement from scratch: a **complete code template with a step-by-step handoff sheet** lives in this repo at [`templates/feedback-widget/`](../../templates/feedback-widget/HANDOFF.md). The handoff sheet (`HANDOFF.md`) contains the architecture, file map, install commands, GitHub setup, env vars, security notes, gotchas, and a verification checklist. The `files/` folder contains 17 generalized source files with every app-specific integration point marked `ADAPT`.
+This is not a description to reimplement from scratch: a **complete code template** lives in this repo at [`templates/feedback-widget/`](../../templates/feedback-widget/HANDOFF.md), usable in two modes:
+
+- **Faithful install** (`HANDOFF.md`): checklist for stacks matching the reference (Next.js App Router + shadcn); architecture, file map, install commands, GitHub setup, env vars, security notes, gotchas, verification checklist. `files/` holds 17 generalized source files with every app-specific integration point marked `ADAPT`.
+- **Adaptive install** (`SPEC.md`): design spec for everything else; separates the invariants (security model, resilience, UX floors that must always hold) from the degrees of freedom (UI surface, form/API shape, categories, triage destination, storage) and defines a survey-plan-implement procedure so Claude designs the integration to fit each codebase's existing conventions.
 
 Three adoption tiers so small projects can take less:
 1. **Core**: button + dialog + `/api/feedback` route that opens the GitHub issue (needs only a fine-grained PAT and a private repo).
@@ -32,27 +35,7 @@ Canonical template in this repo: `templates/feedback-widget/` (HANDOFF.md + `fil
 
 Live reference implementation: Vigilis repo, `src/components/feedback/`, `src/lib/feedback/`, `src/app/api/feedback/` (extracted 2026-07-06).
 
-Prompt to hand to Claude in a target repo (local first, fetch fallback; BP is public so the raw fetch needs no auth):
-
-```text
-Install the in-app feedback widget from the BP repo template (BoardPandas/BP,
-templates/feedback-widget/).
-
-Get the template, local first with fetch as fallback:
-1. If C:\Github\BP exists on this machine, use
-   C:\Github\BP\templates\feedback-widget\ (read HANDOFF.md there).
-2. Otherwise fetch
-   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/HANDOFF.md
-   then fetch each template file listed in its section 4 file map from
-   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/<template file path>
-
-Then follow HANDOFF.md top to bottom.
-- Tier: [1 = button + GitHub issue | 2 = + screenshots | 3 = + browser diagnostics]
-- Auth: [BetterAuth / NextAuth / Clerk / ... or "detect from codebase"]
-- Storage (tier 2 only): [S3 / R2 / Railway buckets / none]
-- Analytics: [PostHog / none, or "detect from codebase"]
-- GitHub triage repo: [your-org/your-app-feedback]
-```
+Copy-paste prompts for a target repo live in the intro of [`templates/feedback-widget/HANDOFF.md`](../../templates/feedback-widget/HANDOFF.md) (single source of truth so they don't drift): **Prompt A** for a faithful install on a matching stack, **Prompt B** for an adaptive install where Claude surveys the repo and designs the integration per `SPEC.md`. Both are local-first (`C:\Github\BP`) with raw-fetch fallback; BP is public so the fetch needs no auth.
 
 ## CHECK
 

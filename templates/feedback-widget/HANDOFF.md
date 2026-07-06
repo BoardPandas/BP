@@ -2,7 +2,14 @@
 
 A drop-in, in-app "Send feedback" tool extracted from the Vigilis dashboard. Users click a Feedback button (page header or inside any modal), pick a category and severity, write a message, optionally attach or paste a screenshot, and submit. The server opens a labeled GitHub issue in a private triage repo, enriched with page context, user identity, and (optionally) silently captured browser diagnostics: recent console errors, failed network requests, click/navigation breadcrumbs, session-replay links, and runtime health.
 
-**How to use this sheet:** in a Claude Code session inside the target repo, paste the canonical prompt below. It resolves the template local-first with a network fallback, so it works on any machine (BoardPandas/BP is public; raw fetch needs no auth).
+**Two ways to use this template:**
+
+- **Faithful install (this file):** the target repo matches the reference stack (Next.js App Router + shadcn). Follow this sheet top to bottom; it is deliberately a checklist.
+- **Adaptive install ([SPEC.md](SPEC.md)):** the stack, conventions, or product needs differ, or you want Claude to design the best-fitting integration rather than copy files. SPEC.md separates the invariants (never break) from the degrees of freedom (redesign per repo) and defines the survey-plan-implement procedure. Sections 10-12 of this file remain the source for security detail, gotchas, and verification in both modes.
+
+In a Claude Code session inside the target repo, paste one of the prompts below. Both resolve the template local-first with a network fallback, so they work on any machine (BoardPandas/BP is public; raw fetch needs no auth).
+
+**Prompt A: faithful install**
 
 ```text
 Install the in-app feedback widget from the BP repo template (BoardPandas/BP,
@@ -24,7 +31,30 @@ Then follow HANDOFF.md top to bottom.
 - GitHub triage repo: [your-org/your-app-feedback]
 ```
 
-Everything Claude needs is in this file plus the `files/` folder. Every app-specific seam is marked `ADAPT` in the code. The section 4 file map doubles as the fetch manifest: template paths there are relative to `templates/feedback-widget/`.
+**Prompt B: adaptive install**
+
+```text
+Add an in-app feedback widget to this repo, designed to fit this codebase.
+Base it on the BP feedback-widget template (BoardPandas/BP,
+templates/feedback-widget/), local first with fetch as fallback:
+1. If C:\Github\BP exists on this machine, read
+   C:\Github\BP\templates\feedback-widget\SPEC.md and HANDOFF.md.
+2. Otherwise fetch them from
+   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/
+   (plus any reference files from HANDOFF.md's section 4 file map you need).
+
+Follow SPEC.md's adaptive install procedure: survey this repo's auth, UI kit,
+form/API/storage/analytics conventions first, then design the integration to
+match how this codebase already does things. Preserve every SPEC section 3
+invariant and reuse reference code where the stack matches; redesign anything
+in SPEC section 4 that fits this repo better. Show me your integration plan
+(surface, endpoints, file placement, deviations from the reference) before
+implementing.
+- Tier: [1 | 2 | 3, or "recommend one for this app"]
+- Triage destination: [GitHub repo your-org/your-app-feedback, or propose]
+```
+
+Everything Claude needs is in this file, SPEC.md, and the `files/` folder. Every app-specific seam is marked `ADAPT` in the code. The section 4 file map doubles as the fetch manifest: template paths there are relative to `templates/feedback-widget/`.
 
 ---
 
