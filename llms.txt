@@ -63,3 +63,6 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 
 ### Notifications
 - [Notifications index](practices/notifications/llms.txt): Multi-channel fan-out with per-channel failure isolation (1 entry)
+
+### User Feedback
+- [User Feedback index](practices/user-feedback/llms.txt): In-app feedback widget to GitHub-issue pipeline, screenshots, redacted browser diagnostics; code template in templates/feedback-widget/ (1 entry)

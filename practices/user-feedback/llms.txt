@@ -1,0 +1,7 @@
+# User Feedback Best Practices
+
+> Proven patterns for capturing actionable in-app user feedback.
+
+## Entries
+
+- [Portable In-App Feedback Widget (Button to GitHub Issue)](in-app-feedback-widget.md): Drop-in feedback button + dialog + GitHub-issue pipeline with screenshots and redacted browser diagnostics; full code template at templates/feedback-widget/. RECOMMENDED.
