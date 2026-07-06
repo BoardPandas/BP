@@ -53,7 +53,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Knowledge Bases index](practices/knowledge-bases/llms.txt): YAML frontmatter, two-level indexes, ID conventions (1 entry)
 
 ### Security
-- [Security index](practices/security/llms.txt): Tenant data isolation, customer-controlled support access, audit trails, OAuth 2.1 / MCP resource-server hardening, key rotation, tenant 404s, internal loopback bridge (5 entries)
+- [Security index](practices/security/llms.txt): Tenant data isolation, customer-controlled support access, audit trails, OAuth 2.1 / MCP resource-server hardening, key rotation, tenant 404s, internal loopback bridge, link-preview bot passthrough (6 entries)
 
 ### Database
 - [Database index](practices/database/llms.txt): Drizzle migrations, Postgres patterns, migration numbering discipline (3 entries)
