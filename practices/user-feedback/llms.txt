@@ -4,4 +4,4 @@
 
 ## Entries
 
-- [Portable In-App Feedback Widget (Button to GitHub Issue)](in-app-feedback-widget.md): Drop-in feedback button + dialog + GitHub-issue pipeline with screenshots and redacted browser diagnostics; full code template at templates/feedback-widget/. RECOMMENDED.
+- [Portable In-App Feedback Widget (Button to GitHub Issue)](in-app-feedback-widget.md): Drop-in feedback button + dialog + GitHub-issue pipeline with screenshots, redacted browser diagnostics, and an optional Slack-channel post; full code template at templates/feedback-widget/. RECOMMENDED.

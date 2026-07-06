@@ -3,6 +3,8 @@
 import { NextResponse } from "next/server";
 import { uploadGithubAttachment } from "@/lib/feedback/github-attachment";
 import { buildFeedbackGithubIssue } from "@/lib/feedback/github-issue";
+// TIER 4 (Slack): delete this import if you skip the Slack channel post.
+import { buildFeedbackSlackMessage } from "@/lib/feedback/slack-message";
 import {
   apiError,
   apiSuccess,
@@ -230,6 +232,58 @@ export async function POST(req: Request) {
     );
   }
 
+  // ── TIER 4: Slack channel post ──────────────────────────────────────────
+  // Post the submission to a single team channel via an incoming webhook.
+  // Best-effort and fail-open, exactly like the GitHub calls above: a webhook
+  // outage or missing config never fails the submission. Delete this block and
+  // the slack-message import if you skip Slack.
+  const slackWebhookUrl = process.env.SLACK_FEEDBACK_WEBHOOK_URL;
+  let slackSent = false;
+  if (slackWebhookUrl) {
+    try {
+      const slackPayload = buildFeedbackSlackMessage({
+        category: body.category,
+        severity: body.severity,
+        message: body.message,
+        pageUrl: body.pageUrl,
+        pagePath: body.pagePath,
+        userAgent: body.userAgent,
+        viewport: body.viewport,
+        language: body.language,
+        timezone: body.timezone,
+        user: { id: userId, name: user.name, email: user.email, role: user.role },
+        context, // same tenant rows built for the GitHub issue
+        issue: issueNumber && githubRepo ? { number: issueNumber, repo: githubRepo } : null,
+      });
+      const res = await fetch(slackWebhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(slackPayload),
+      });
+      slackSent = res.ok;
+      if (!res.ok) {
+        log(
+          "warn",
+          { correlationId, status: res.status, category: body.category },
+          "Slack feedback webhook returned non-2xx",
+        );
+      }
+    } catch (err) {
+      log(
+        "error",
+        { correlationId, category: body.category, err: err instanceof Error ? err.message : String(err) },
+        "Slack feedback webhook post failed",
+      );
+    }
+  } else {
+    log(
+      "warn",
+      { correlationId, category: body.category },
+      "SLACK_FEEDBACK_WEBHOOK_URL not configured — feedback recorded but not posted to Slack",
+    );
+  }
+  // ── end TIER 4 ──────────────────────────────────────────────────────────
+
   log(
     "info",
     {
@@ -249,6 +303,7 @@ export async function POST(req: Request) {
       diagnosticsGithubPath,
       githubIssueCreated: issueCreated,
       githubIssueNumber: issueNumber,
+      slackSent,
     },
     "Feedback submitted",
   );

@@ -24,7 +24,7 @@ Get the template, local first with fetch as fallback:
    https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/<template file path>
 
 Then follow HANDOFF.md top to bottom.
-- Tier: [1 = button + GitHub issue | 2 = + screenshots | 3 = + browser diagnostics]
+- Tier: [1 = button + GitHub issue | 2 = + screenshots | 3 = + browser diagnostics | 4 = + Slack channel post]
 - Auth: [BetterAuth / NextAuth / Clerk / ... or "detect from codebase"]
 - Storage (tier 2 only): [S3 / R2 / Railway buckets / none]
 - Analytics: [PostHog / none, or "detect from codebase"]
@@ -50,8 +50,8 @@ invariant and reuse reference code where the stack matches; redesign anything
 in SPEC section 4 that fits this repo better. Show me your integration plan
 (surface, endpoints, file placement, deviations from the reference) before
 implementing.
-- Tier: [1 | 2 | 3, or "recommend one for this app"]
-- Triage destination: [GitHub repo your-org/your-app-feedback, or propose]
+- Tier: [1 | 2 | 3 | 4, or "recommend one for this app"]
+- Triage destination: [GitHub repo your-org/your-app-feedback, and/or a Slack channel, or propose]
 ```
 
 Everything Claude needs is in this file, SPEC.md, and the `files/` folder. Every app-specific seam is marked `ADAPT` in the code. The section 4 file map doubles as the fetch manifest: template paths there are relative to `templates/feedback-widget/`.
@@ -66,6 +66,7 @@ Everything Claude needs is in this file, SPEC.md, and the `files/` folder. Every
 | In-modal button (optional) | `DialogFeedbackButton` renders inside every shadcn dialog; captures the modal title so the issue says where the user was |
 | Dialog | Category + severity selects, 10-2000 char message with counter, optional screenshot (file picker or Ctrl+V paste), rate-limit-aware errors, success toast |
 | Output | GitHub issue in a private repo with labels (`feedback`, `severity:*`, category, `surface:page|modal`), full context section, screenshot link, diagnostics summary, and a committed full-diagnostics JSON artifact |
+| Slack (optional, tier 4) | Same submission posted to one team channel via an incoming webhook, as a Block Kit message with category/severity, submitter, tenant context, message, page link, and a link to the GitHub issue |
 
 ## 2. Architecture
 
@@ -89,7 +90,8 @@ FeedbackButton / DialogFeedbackButton
                            (fallback: 7-day presigned URL)
                         5. diagnostics JSON committed to repo   -> feedback-attachments/diagnostics/...
                         6. create issue                          -> Issues API
-                        7. log + analytics event
+                        7. post to Slack channel (tier 4)         -> Incoming Webhook
+                        8. log + analytics event
 ```
 
 ## 3. Adoption tiers
@@ -101,8 +103,9 @@ Install incrementally. Each tier works without the ones above it.
 | **1: Core** | Button + dialog + `/api/feedback` -> GitHub issue with page/user context | GitHub PAT + private repo |
 | **2: Screenshots** | Attach/paste image, presigned upload, committed into the repo | S3-compatible object storage |
 | **3: Diagnostics** | Silent console/network/breadcrumb capture, React-crash record, diagnostics JSON artifact | None (optional analytics SDK for replay links) |
+| **4: Slack** | Post each submission to one team channel as a Block Kit message linking the GitHub issue | Slack incoming webhook for the channel |
 
-Tier 2 and 3 code paths are marked `TIER 2` / `TIER 3` in the files; the sheet notes what to delete if you skip them. If unsure, install all three: tier 3 is what makes bug reports actionable without a follow-up conversation.
+Tier 2, 3, and 4 code paths are marked `TIER 2` / `TIER 3` / `TIER 4` in the files; the sheet notes what to delete if you skip them. If unsure, install tiers 1-3: tier 3 is what makes bug reports actionable without a follow-up conversation. Add tier 4 when the team already lives in Slack and wants submissions to land there in real time (it works with or without tier 1's GitHub issue).
 
 ## 4. File map
 
@@ -112,6 +115,7 @@ Copy each template file to its destination (the destination is also in the heade
 |---|---|---|
 | `files/lib/validations-feedback.ts` | `src/lib/validations/feedback.ts` | 1 |
 | `files/lib/github-issue.ts` | `src/lib/feedback/github-issue.ts` | 1 |
+| `files/lib/slack-message.ts` | `src/lib/feedback/slack-message.ts` | 4 |
 | `files/lib/github-attachment.ts` | `src/lib/feedback/github-attachment.ts` | 2/3 |
 | `files/server/server-adapter.ts` | `src/lib/feedback/server-adapter.ts` | 1 |
 | `files/server/storage.ts` | `src/lib/feedback/storage.ts` | 2 |
@@ -161,11 +165,12 @@ These are the only places that need project-specific code. Search the copied fil
 | 5 | Server analytics | `server-adapter.ts` -> `track()` | Optional | No-op by default; forward to PostHog/Segment. |
 | 6 | Client analytics | `analytics-client.ts` -> `track()` | Optional | Same, client-side. |
 | 7 | Storage | `storage.ts` | Tier 2 | Generic S3 client using `S3_*` env vars. If the project already has a storage lib, delete this file and re-point the imports in both API routes. |
-| 8 | Tenant context | `feedback-route.ts` -> `context` array | Optional | Push rows like `{ label: "Org", value: "Acme (org_123)" }` to show tenant info in the issue. Vigilis fills this with org + partner lookups. |
+| 8 | Tenant context | `feedback-route.ts` -> `context` array | Optional | Push rows like `{ label: "Org", value: "Acme (org_123)" }` to show tenant info in the issue. Vigilis fills this with org + partner lookups. The same array feeds the tier 4 Slack message, so you wire it once. |
 | 9 | Categories | `validations-feedback.ts` + `github-issue.ts` | Optional | Trim/extend `feedbackCategories`; keep `CATEGORY_LABEL_SLUG` and GitHub labels in sync. |
 | 10 | Telemetry window key | `telemetry-types.ts` -> `WINDOW_KEY` | Optional | Rename per app. |
 | 11 | Analytics host ignore | `telemetry-capture.ts` | Optional | Set `NEXT_PUBLIC_ANALYTICS_HOST` so the fetch patch ignores your own analytics traffic. |
 | 12 | Session replay | `telemetry-client.ts` -> `collectSession()` | Optional | Reads `window.posthog` if present; wire to your SDK import for replay URLs and flags. |
+| 13 | Slack channel | `SLACK_FEEDBACK_WEBHOOK_URL` env var | Tier 4 | Create an incoming webhook bound to the target channel (see section 7.1) and set the env var. `slack-message.ts` itself needs no edits — tenant fields flow through the seam 8 `context` array. |
 
 ## 7. GitHub setup (one-time, per app)
 
@@ -193,6 +198,12 @@ gh label create other --repo your-org/your-app-feedback --color EDEDED
 
 Missing labels do not break issue creation (GitHub auto-creates labels when the token has Issues write), but pre-creating gives you controlled colors.
 
+### 7.1 Slack setup (tier 4 only, one-time per app)
+
+1. In the target Slack workspace, create (or reuse) a Slack app, enable **Incoming Webhooks**, and **Add New Webhook to Workspace**, selecting the channel submissions should land in (e.g. `#feedback` or `#github-alerts`).
+2. Copy the webhook URL (`https://hooks.slack.com/services/...`) into `SLACK_FEEDBACK_WEBHOOK_URL`. Treat it as a secret — anyone with the URL can post to that channel.
+3. A single incoming webhook is **bound to one channel** at creation. To post to a different channel, create another webhook; you cannot redirect it from the payload.
+
 ## 8. Environment variables
 
 | Variable | Tier | Purpose |
@@ -202,8 +213,9 @@ Missing labels do not break issue creation (GitHub auto-creates labels when the 
 | `S3_BUCKET`, `S3_REGION`, `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | 2 | Object storage for screenshot staging (skip `S3_ENDPOINT` on real AWS) |
 | `NEXT_PUBLIC_APP_VERSION` | 3, optional | Build identifier shown in the Diagnostics section |
 | `NEXT_PUBLIC_ANALYTICS_HOST` | 3, optional | Analytics ingest host to exclude from network capture |
+| `SLACK_FEEDBACK_WEBHOOK_URL` | 4 | Slack incoming webhook for the target channel (see section 7.1) |
 
-If both `GITHUB_FEEDBACK_TOKEN` and `GITHUB_FEEDBACK_REPO` are unset, submissions are still accepted, validated, and logged; no issue is opened (a warning is logged). This makes local dev safe by default.
+If both `GITHUB_FEEDBACK_TOKEN` and `GITHUB_FEEDBACK_REPO` are unset, submissions are still accepted, validated, and logged; no issue is opened (a warning is logged). This makes local dev safe by default. `SLACK_FEEDBACK_WEBHOOK_URL` behaves the same way: unset means the Slack post is skipped with a logged warning, never an error.
 
 ## 9. Install steps
 
@@ -299,6 +311,8 @@ Note: `DialogContent` must not have `overflow-hidden` clipping, since the button
 - **In-memory rate limiter is per-process**: fine on one instance, advisory behind a load balancer. Use Redis there.
 - **GitHub failures never fail the submission**: issue-create, screenshot-commit, and diagnostics-commit all degrade to warnings. The user always gets their "sent" toast; check logs if issues stop appearing.
 - **Issue body size**: everything rendered into the body is truncated/bounded; the full diagnostics live in the committed JSON. Keep it that way or you will hit GitHub's 65k body cap.
+- **Slack mrkdwn injection**: user-supplied strings (message, name, tenant values) are escaped via `escapeSlackMrkdwn` (`<`, `>`, `&`) before going into blocks, so a message like `<!channel>` or `<https://evil|click>` can't forge a mention or link. Keep the escaping if you edit the builder. Section blocks also cap at 10 fields, which is why tenant `context` rows are sliced.
+- **Slack post is best-effort too**: like the GitHub calls, a webhook failure or missing `SLACK_FEEDBACK_WEBHOOK_URL` only logs a warning; the user still gets their "sent" toast. The Slack post runs after issue creation so it can link the issue number.
 
 ## 12. Verification checklist
 
@@ -311,8 +325,10 @@ Note: `DialogContent` must not have `overflow-hidden` clipping, since the button
 - [ ] Tier 3: trigger a console.error and a failing fetch, then submit; the issue's Diagnostics section shows them, and a `diagnostics-*.json` commit exists.
 - [ ] Tier 3: tokens/emails logged to console appear redacted in the artifact.
 - [ ] In-modal button (if installed): submitting from inside a modal sets the `[Modal Title]` prefix and `surface:modal` label.
-- [ ] Env vars unset: submission still succeeds (200) and a "not configured" warning is logged.
+- [ ] Tier 4: with `SLACK_FEEDBACK_WEBHOOK_URL` set, a valid submit posts a Block Kit message to the channel with the correct category/severity and a link to the created issue.
+- [ ] Tier 4: a message containing `<`, `>`, or `&` renders escaped in Slack (no forged mention or link).
+- [ ] Env vars unset: submission still succeeds (200) and a "not configured" warning is logged (GitHub and Slack both).
 
 ---
 
-_Source of truth: extracted 2026-07-06 from the Vigilis dashboard (`src/components/feedback/`, `src/lib/feedback/`, `src/app/api/feedback/`). If Vigilis's implementation evolves, re-extract or diff against these paths._
+_Source of truth: extracted 2026-07-06 from the Vigilis dashboard (`src/components/feedback/`, `src/lib/feedback/`, `src/app/api/feedback/`). If Vigilis's implementation evolves, re-extract or diff against these paths. Tier 4 (Slack) was added 2026-07-06 from the SupportForge implementation, generalized to the template's `context` array (Vigilis's own Slack integration was still in a worktree at the time)._

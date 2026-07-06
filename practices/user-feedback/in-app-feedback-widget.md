@@ -16,16 +16,17 @@ This is not a description to reimplement from scratch: a **complete code templat
 - **Faithful install** (`HANDOFF.md`): checklist for stacks matching the reference (Next.js App Router + shadcn); architecture, file map, install commands, GitHub setup, env vars, security notes, gotchas, verification checklist. `files/` holds 17 generalized source files with every app-specific integration point marked `ADAPT`.
 - **Adaptive install** (`SPEC.md`): design spec for everything else; separates the invariants (security model, resilience, UX floors that must always hold) from the degrees of freedom (UI surface, form/API shape, categories, triage destination, storage) and defines a survey-plan-implement procedure so Claude designs the integration to fit each codebase's existing conventions.
 
-Three adoption tiers so small projects can take less:
+Four adoption tiers so small projects can take less:
 1. **Core**: button + dialog + `/api/feedback` route that opens the GitHub issue (needs only a fine-grained PAT and a private repo).
 2. **Screenshots**: presigned upload to S3-compatible storage, then committed into the triage repo via the Contents API.
 3. **Diagnostics**: patched console/fetch/history ring buffers with client-side PII redaction, attached to the issue as a committed JSON artifact plus a summarized section in the body.
+4. **Slack**: post each submission to one team channel via an incoming webhook, as a Block Kit message linking the GitHub issue (user-supplied text escaped against mrkdwn injection; best-effort, so a webhook outage never blocks the submission).
 
 ## WHY
 
 - Feedback that arrives as a labeled GitHub issue with page URL, user, viewport, console errors, and failed requests is actionable without a follow-up conversation; free-form email/Slack feedback is not.
 - Building this per-repo from scratch takes days and re-discovers the same traps (private-repo image hosting, PAT-vs-cookie attachment APIs, self-capturing fetch patches). The template encodes the working solution once.
-- The tiered design means even a weekend project gets Tier 1 in under an hour, while a production SaaS takes all three.
+- The tiered design means even a weekend project gets Tier 1 in under an hour, while a production SaaS takes all four (Slack is the tier teams that live in chat reach for first).
 - Fail-closed auth stubs (501 API / hidden buttons until wired) prevent a half-finished install from silently accepting anonymous submissions.
 
 ## EXAMPLE

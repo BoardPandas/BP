@@ -18,7 +18,7 @@ An implementation is complete when:
 2. The form captures: category, severity, free-text message (bounded, with a minimum so "broken" alone is rejected).
 3. Submission automatically attaches page context: URL, path, viewport, locale, user agent. The user never types this.
 4. The submission lands in the team's triage system as a structured, labeled item (GitHub issue in the reference) carrying user identity and context.
-5. Optional per-tier: screenshot attach/paste (tier 2), silent browser diagnostics (tier 3).
+5. Optional per-tier: screenshot attach/paste (tier 2), silent browser diagnostics (tier 3), real-time post to a team chat channel (tier 4).
 6. The user gets clear success/failure/rate-limited feedback in the UI.
 
 ## 3. Invariants (preserve these regardless of design)
@@ -32,12 +32,13 @@ These encode the security model and the failure-mode lessons. A redesign may cha
 - S4. Uploaded-object references are ownership-bound: the storage key embeds the user id at presign time and the submit endpoint rejects keys outside that user's namespace. Never accept an arbitrary client-supplied storage key.
 - S5. Captured telemetry is redacted **in the browser, before transport** (JWTs, bearer tokens, emails, long hex/tokens, sensitive query params). Storage inspection counts sizes only, never values.
 - S6. The triage destination is private. Submissions contain user emails, ids, and internal URLs.
-- S7. No secrets in the client bundle. Tracker tokens live server-side only.
+- S7. No secrets in the client bundle. Tracker tokens and chat webhook URLs live server-side only.
+- S8. User-supplied text rendered into any chat/markdown surface (Slack mrkdwn, Teams cards) is escaped before transport, so a message can't forge mentions (`<!channel>`), links, or card markup.
 
 **Resilience**
 - R1. Instrumentation must never break the app: every telemetry hook wraps its work in try/catch and falls through to the original behavior.
 - R2. Network capture must ignore its own traffic (`/api/feedback*`) and analytics ingest, or submissions record their own upload and analytics noise floods the buffer.
-- R3. Tracker outage never fails the user: issue-create, screenshot-commit, and diagnostics-commit all degrade to logged warnings; the user still gets a success response. Missing tracker config = accept, validate, log, warn.
+- R3. Tracker outage never fails the user: issue-create, screenshot-commit, diagnostics-commit, and any chat-channel post all degrade to logged warnings; the user still gets a success response. Missing tracker or webhook config = accept, validate, log, warn.
 - R4. Everything rendered into the tracker item body is truncated/bounded (GitHub caps bodies at 65k); full detail goes into a linked artifact.
 - R5. All ring buffers are capped (console/network/breadcrumb) so memory is bounded on long-lived tabs.
 
@@ -63,6 +64,7 @@ Decide these fresh for each repo, based on what the codebase already does:
 | Telemetry depth | Full tier 3 | Any subset; console+network capture is the highest-value slice |
 | Analytics | No-op stubs | The repo's analytics, or nothing |
 | Tenant context | Empty `context` array | Org/workspace/plan rows looked up server-side |
+| Notification fan-out | GitHub issue only | Add a chat-channel post (tier 4 Slack webhook in the reference; Teams/Discord webhooks are the same shape), with or without the issue. One webhook binds to one channel |
 
 ## 5. Hard-won constraints (do not re-derive these)
 
