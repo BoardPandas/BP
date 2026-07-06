@@ -7,3 +7,4 @@
 - [Read-Only First Rule (RULE 0)](read-only-first-rule.md): Gather information before taking action. Read-only commands first. Modifications only with user approval. FOUNDATIONAL.
 - [Permissions Pass Gate (RULE 2)](permissions-gate.md): Cryptographic verification gate for privileged Graph API permission changes. RECOMMENDED.
 - [tenant-scope-ok Escape Hatch for Multi-Tenant Lint Checks](tenant-scope-ok-escape-hatch.md): Grep-able, audit-friendly escape hatch for the few routes where strict tenant-scope enforcement has a legitimate exception. RECOMMENDED.
+- [Versioned Config Migration with Pre-Migration Backup](versioned-config-migration-backup.md): Schema-versioned settings files migrate on load with a version-stamped backup written first and the result saved immediately; retired fields stay deserializable. RECOMMENDED.
