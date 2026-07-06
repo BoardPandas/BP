@@ -38,7 +38,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Versioning index](practices/versioning/llms.txt): Semver, changelog enforcement (2 entries)
 
 ### Safety
-- [Safety index](practices/safety/llms.txt): Read-only-first, permissions gates, PreToolUse hooks, versioned config migration backups (4 entries)
+- [Safety index](practices/safety/llms.txt): Read-only-first, permissions gates, PreToolUse hooks, versioned config migration backups, secretless third-party writes (5 entries)
 
 ### Documentation
 - [Documentation index](practices/documentation/llms.txt): Reference files, plan structure, investigation patterns (2 entries)
