@@ -2,11 +2,29 @@
 
 A drop-in, in-app "Send feedback" tool extracted from the Vigilis dashboard. Users click a Feedback button (page header or inside any modal), pick a category and severity, write a message, optionally attach or paste a screenshot, and submit. The server opens a labeled GitHub issue in a private triage repo, enriched with page context, user identity, and (optionally) silently captured browser diagnostics: recent console errors, failed network requests, click/navigation breadcrumbs, session-replay links, and runtime health.
 
-**How to use this sheet:** copy this whole folder into the target repo (or just reference its path), then tell Claude Code:
+**How to use this sheet:** in a Claude Code session inside the target repo, paste the canonical prompt below. It resolves the template local-first with a network fallback, so it works on any machine (BoardPandas/BP is public; raw fetch needs no auth).
 
-> Install the in-app feedback widget from templates/feedback-widget per HANDOFF.md. Use Tier [1|2|3]. Our auth is [BetterAuth/NextAuth/...], our storage is [S3/R2/none], our analytics is [PostHog/none].
+```text
+Install the in-app feedback widget from the BP repo template (BoardPandas/BP,
+templates/feedback-widget/).
 
-Everything Claude needs is in this file plus the `files/` folder. Every app-specific seam is marked `ADAPT` in the code.
+Get the template, local first with fetch as fallback:
+1. If C:\Github\BP exists on this machine, use
+   C:\Github\BP\templates\feedback-widget\ (read HANDOFF.md there).
+2. Otherwise fetch
+   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/HANDOFF.md
+   then fetch each template file listed in its section 4 file map from
+   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/<template file path>
+
+Then follow HANDOFF.md top to bottom.
+- Tier: [1 = button + GitHub issue | 2 = + screenshots | 3 = + browser diagnostics]
+- Auth: [BetterAuth / NextAuth / Clerk / ... or "detect from codebase"]
+- Storage (tier 2 only): [S3 / R2 / Railway buckets / none]
+- Analytics: [PostHog / none, or "detect from codebase"]
+- GitHub triage repo: [your-org/your-app-feedback]
+```
+
+Everything Claude needs is in this file plus the `files/` folder. Every app-specific seam is marked `ADAPT` in the code. The section 4 file map doubles as the fetch manifest: template paths there are relative to `templates/feedback-widget/`.
 
 ---
 

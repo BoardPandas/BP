@@ -32,9 +32,27 @@ Canonical template in this repo: `templates/feedback-widget/` (HANDOFF.md + `fil
 
 Live reference implementation: Vigilis repo, `src/components/feedback/`, `src/lib/feedback/`, `src/app/api/feedback/` (extracted 2026-07-06).
 
-Prompt to hand to Claude in a target repo:
+Prompt to hand to Claude in a target repo (local first, fetch fallback; BP is public so the raw fetch needs no auth):
 
-> Install the in-app feedback widget from the BP repo template (BoardPandas/BP, templates/feedback-widget/) per its HANDOFF.md. Use Tier [1|2|3]. Our auth is [BetterAuth/NextAuth/...], our storage is [S3/R2/none], our analytics is [PostHog/none].
+```text
+Install the in-app feedback widget from the BP repo template (BoardPandas/BP,
+templates/feedback-widget/).
+
+Get the template, local first with fetch as fallback:
+1. If C:\Github\BP exists on this machine, use
+   C:\Github\BP\templates\feedback-widget\ (read HANDOFF.md there).
+2. Otherwise fetch
+   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/HANDOFF.md
+   then fetch each template file listed in its section 4 file map from
+   https://raw.githubusercontent.com/BoardPandas/BP/main/templates/feedback-widget/<template file path>
+
+Then follow HANDOFF.md top to bottom.
+- Tier: [1 = button + GitHub issue | 2 = + screenshots | 3 = + browser diagnostics]
+- Auth: [BetterAuth / NextAuth / Clerk / ... or "detect from codebase"]
+- Storage (tier 2 only): [S3 / R2 / Railway buckets / none]
+- Analytics: [PostHog / none, or "detect from codebase"]
+- GitHub triage repo: [your-org/your-app-feedback]
+```
 
 ## CHECK
 
