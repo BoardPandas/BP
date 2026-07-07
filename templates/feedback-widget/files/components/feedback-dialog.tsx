@@ -27,6 +27,7 @@ import { collectFeedbackDiagnostics } from "@/lib/feedback/telemetry-client";
 import {
   FEEDBACK_CATEGORY_LABELS,
   FEEDBACK_SCREENSHOT_MAX_BYTES,
+  FEEDBACK_SCREENSHOT_MAX_COUNT,
   type FeedbackCategory,
   type FeedbackScreenshotMimeType,
   type FeedbackSeverity,
@@ -81,12 +82,16 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
-  // TIER 2: screenshot state. Delete this block (through uploadScreenshot) if
+  // TIER 2: screenshot state. Delete this block (through uploadScreenshots) if
   // you skip screenshot support, along with the Screenshot section in the JSX.
-  const [screenshot, setScreenshot] = useState<File | null>(null);
-  const [screenshotPreview, setScreenshotPreview] = useState<string | null>(null);
+  const [screenshots, setScreenshots] = useState<File[]>([]);
+  const [screenshotPreviews, setScreenshotPreviews] = useState<string[]>([]);
   const [screenshotError, setScreenshotError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // Mirrors `screenshots` so addFiles can validate against the live count
+  // synchronously without a stale closure, even across rapid successive calls
+  // (a multi-file picker selection and a paste can both fire in one tick).
+  const screenshotsRef = useRef<File[]>([]);
 
   const form = useForm<{
     category: FeedbackCategory;
@@ -111,35 +116,56 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
     if (open) {
       form.reset({ category: "bug", severity: "medium", message: "" });
       setServerError(null);
-      setScreenshot(null);
+      setScreenshots([]);
       setScreenshotError(null);
     }
   }, [open, form.reset]);
 
-  // Manage object-URL lifecycle for the preview thumbnail.
+  // Keep the ref in lockstep with the state array.
   useEffect(() => {
-    if (!screenshot) {
-      setScreenshotPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(screenshot);
-    setScreenshotPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [screenshot]);
+    screenshotsRef.current = screenshots;
+  }, [screenshots]);
 
-  const handleFile = useCallback((file: File) => {
-    setScreenshotError(null);
-    if (!ALLOWED_MIME_SET.has(file.type)) {
-      setScreenshotError("Please attach a PNG, JPEG, WebP, or GIF image.");
+  // Manage object-URL lifecycle for the preview thumbnails.
+  useEffect(() => {
+    if (screenshots.length === 0) {
+      setScreenshotPreviews([]);
       return;
     }
-    if (file.size > FEEDBACK_SCREENSHOT_MAX_BYTES) {
-      setScreenshotError(
-        `Screenshot is too large (${formatBytes(file.size)}). Max ${formatBytes(FEEDBACK_SCREENSHOT_MAX_BYTES)}.`,
-      );
-      return;
+    const urls = screenshots.map((file) => URL.createObjectURL(file));
+    setScreenshotPreviews(urls);
+    return () => urls.forEach((url) => URL.revokeObjectURL(url));
+  }, [screenshots]);
+
+  // Validate and add a batch of files in one pass. Pure: computes the next
+  // array and a single error message up front, then commits both. Reads the
+  // live count from the ref so a batch that overflows the cap is truncated
+  // correctly rather than each call racing on stale state.
+  const addFiles = useCallback((incoming: File[]) => {
+    const current = screenshotsRef.current;
+    const accepted: File[] = [];
+    let rejection: string | null = null;
+    for (const file of incoming) {
+      if (current.length + accepted.length >= FEEDBACK_SCREENSHOT_MAX_COUNT) {
+        rejection = `You can attach up to ${FEEDBACK_SCREENSHOT_MAX_COUNT} screenshots.`;
+        break;
+      }
+      if (!ALLOWED_MIME_SET.has(file.type)) {
+        rejection = "Please attach a PNG, JPEG, WebP, or GIF image.";
+        continue;
+      }
+      if (file.size > FEEDBACK_SCREENSHOT_MAX_BYTES) {
+        rejection = `Screenshot is too large (${formatBytes(file.size)}). Max ${formatBytes(FEEDBACK_SCREENSHOT_MAX_BYTES)}.`;
+        continue;
+      }
+      accepted.push(file);
     }
-    setScreenshot(file);
+    if (accepted.length > 0) {
+      const next = [...current, ...accepted];
+      screenshotsRef.current = next;
+      setScreenshots(next);
+    }
+    setScreenshotError(rejection);
   }, []);
 
   // Allow paste-from-clipboard while the dialog is open.
@@ -158,24 +184,25 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
       }
       const items = e.clipboardData?.items;
       if (!items) return;
+      const pastedFiles: File[] = [];
       for (const item of items) {
         if (item.kind === "file" && item.type.startsWith("image/")) {
           const file = item.getAsFile();
-          if (file) {
-            e.preventDefault();
-            handleFile(file);
-            return;
-          }
+          if (file) pastedFiles.push(file);
         }
+      }
+      if (pastedFiles.length > 0) {
+        e.preventDefault();
+        addFiles(pastedFiles);
       }
     }
     window.addEventListener("paste", onPaste);
     return () => window.removeEventListener("paste", onPaste);
-  }, [open, handleFile]);
+  }, [open, addFiles]);
 
-  function clearScreenshot() {
-    setScreenshot(null);
+  function removeScreenshot(index: number) {
     setScreenshotError(null);
+    setScreenshots((prev) => prev.filter((_, i) => i !== index));
     if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
@@ -206,6 +233,11 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
     return data.key;
   }
 
+  // Each screenshot is an independent presign + PUT, so upload in parallel.
+  async function uploadScreenshots(files: File[]): Promise<string[]> {
+    return Promise.all(files.map((file) => uploadScreenshot(file)));
+  }
+
   const messageValue = form.watch("message") ?? "";
 
   async function onSubmit(values: {
@@ -216,10 +248,10 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
     setSubmitting(true);
     setServerError(null);
     try {
-      let screenshotKey: string | null = null;
-      if (screenshot) {
+      let screenshotKeys: string[] = [];
+      if (screenshots.length > 0) {
         try {
-          screenshotKey = await uploadScreenshot(screenshot);
+          screenshotKeys = await uploadScreenshots(screenshots);
         } catch (err) {
           setServerError(err instanceof Error ? err.message : "Failed to upload screenshot");
           return;
@@ -229,7 +261,7 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
       const payload: FeedbackSubmission = {
         ...values,
         ...collectClientContext(),
-        screenshotKey,
+        screenshotKeys,
         modalTitle: modalTitle ?? null,
         // TIER 3: replace with `diagnostics: null` if you skip telemetry.
         diagnostics: collectFeedbackDiagnostics(),
@@ -253,7 +285,8 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
       track("feedback_submitted_client", {
         category: values.category,
         severity: values.severity,
-        hasScreenshot: !!screenshotKey,
+        hasScreenshot: screenshotKeys.length > 0,
+        screenshotCount: screenshotKeys.length,
         surface: modalTitle ? "modal" : "page",
       });
       toast.success("Thanks — feedback sent");
@@ -339,60 +372,69 @@ export function FeedbackDialog({ open, onOpenChange, modalTitle }: FeedbackDialo
 
           {/* TIER 2: Screenshot section — delete if you skip screenshot support. */}
           <div className="space-y-2">
-            <Label>Screenshot (optional)</Label>
+            <Label>Screenshots (optional)</Label>
             <input
               ref={fileInputRef}
               type="file"
               accept={ALLOWED_MIME_ACCEPT}
+              multiple
               className="hidden"
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleFile(file);
+                const files = Array.from(e.target.files ?? []);
+                addFiles(files);
+                if (fileInputRef.current) fileInputRef.current.value = "";
               }}
             />
-            {screenshot && screenshotPreview ? (
-              <div className="flex items-start gap-3 rounded-md border p-3">
-                <Image
-                  src={screenshotPreview}
-                  alt="Screenshot preview"
-                  width={96}
-                  height={64}
-                  className="h-16 w-24 rounded border object-cover"
-                  unoptimized
-                />
-                <div className="min-w-0 flex-1 text-sm">
-                  <div className="truncate font-medium">{screenshot.name}</div>
-                  <div className="text-xs text-muted-foreground">
-                    {formatBytes(screenshot.size)}
+            {screenshots.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {screenshots.map((file, index) => (
+                  <div
+                    key={`${file.name}-${file.lastModified}-${index}`}
+                    className="relative rounded-md border p-2"
+                  >
+                    {screenshotPreviews[index] && (
+                      <Image
+                        src={screenshotPreviews[index]}
+                        alt={`Screenshot preview ${index + 1}`}
+                        width={96}
+                        height={64}
+                        className="h-16 w-full rounded border object-cover"
+                        unoptimized
+                      />
+                    )}
+                    <div className="mt-1 truncate text-xs text-muted-foreground">
+                      {formatBytes(file.size)}
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-background shadow"
+                      onClick={() => removeScreenshot(index)}
+                      aria-label={`Remove screenshot ${index + 1}`}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
                   </div>
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={clearScreenshot}
-                  aria-label="Remove screenshot"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Paperclip className="mr-2 h-4 w-4" />
-                  Attach screenshot
-                </Button>
-                <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <ImageIcon className="h-3 w-3" />
-                  or paste an image (Ctrl+V)
-                </span>
+                ))}
               </div>
             )}
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={screenshots.length >= FEEDBACK_SCREENSHOT_MAX_COUNT}
+              >
+                <Paperclip className="mr-2 h-4 w-4" />
+                {screenshots.length > 0 ? "Add another" : "Attach screenshot"}
+              </Button>
+              <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                <ImageIcon className="h-3 w-3" />
+                or paste an image (Ctrl+V) · up to {FEEDBACK_SCREENSHOT_MAX_COUNT}
+              </span>
+            </div>
             {screenshotError && <p className="text-sm text-destructive">{screenshotError}</p>}
           </div>
 

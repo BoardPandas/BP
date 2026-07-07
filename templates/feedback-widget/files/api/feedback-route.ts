@@ -15,7 +15,10 @@ import {
 } from "@/lib/feedback/server-adapter";
 // TIER 2 (screenshots): delete this import if you skip screenshot support.
 import { getDownloadUrl, getObjectBytes } from "@/lib/feedback/storage";
-import { feedbackSubmissionSchema } from "@/lib/validations/feedback";
+import {
+  FEEDBACK_SCREENSHOT_MAX_COUNT,
+  feedbackSubmissionSchema,
+} from "@/lib/validations/feedback";
 
 const FEEDBACK_RATE_LIMIT = {
   windowMs: 30_000,
@@ -55,16 +58,24 @@ export async function POST(req: Request) {
   const body = parsed.data;
 
   // ── TIER 2: screenshot handling ─────────────────────────────────────────
+  // Merge the multi-screenshot array with the deprecated single-key field for
+  // back-compat, de-dupe, and enforce the attachment cap server-side too (the
+  // client already caps at FEEDBACK_SCREENSHOT_MAX_COUNT).
+  const screenshotKeys = Array.from(
+    new Set([...(body.screenshotKeys ?? []), ...(body.screenshotKey ? [body.screenshotKey] : [])]),
+  ).slice(0, FEEDBACK_SCREENSHOT_MAX_COUNT);
+
   // Reject keys that don't belong to this user — prevents a client from
   // attaching a screenshot uploaded by a different account.
-  const screenshotKey = body.screenshotKey ?? null;
-  if (screenshotKey && !screenshotKey.startsWith(`feedback/${userId}/`)) {
-    return apiError("Invalid screenshot reference", 400);
+  for (const key of screenshotKeys) {
+    if (!key.startsWith(`feedback/${userId}/`)) {
+      return apiError("Invalid screenshot reference", 400);
+    }
   }
 
-  let screenshot: { url: string; expiresAt: Date | null } | null = null;
-  let screenshotGithubPath: string | null = null;
-  if (screenshotKey) {
+  const screenshots: Array<{ url: string; expiresAt: Date | null }> = [];
+  const screenshotGithubPaths: string[] = [];
+  for (const [i, screenshotKey] of screenshotKeys.entries()) {
     // Pull bytes back from object storage so we can commit them into the repo.
     let bytes: Uint8Array | null = null;
     let storedContentType: string | undefined;
@@ -80,6 +91,7 @@ export async function POST(req: Request) {
       );
     }
 
+    let uploaded: { url: string; expiresAt: Date | null } | null = null;
     if (bytes && githubToken && githubRepo) {
       try {
         const filenameFromKey = screenshotKey.split("/").pop() ?? "screenshot";
@@ -90,10 +102,13 @@ export async function POST(req: Request) {
           filename: filenameFromKey,
           contentType: storedContentType ?? "application/octet-stream",
           category: body.category,
-          correlationId,
+          // Index suffix keeps each attachment's repo path unique — the helper
+          // derives the path from correlationId + filename stem, and multiple
+          // screenshots in one submission would otherwise collide.
+          correlationId: `${correlationId}-${i}`,
         });
-        screenshot = { url: attachment.url, expiresAt: null };
-        screenshotGithubPath = attachment.path;
+        uploaded = { url: attachment.url, expiresAt: null };
+        screenshotGithubPaths.push(attachment.path);
       } catch (err) {
         log(
           "warn",
@@ -104,10 +119,10 @@ export async function POST(req: Request) {
     }
 
     // Fallback: if GitHub commit failed (or token not configured), embed a presigned URL.
-    if (!screenshot) {
+    if (!uploaded) {
       try {
         const url = await getDownloadUrl(screenshotKey, SCREENSHOT_DOWNLOAD_TTL_SECONDS);
-        screenshot = {
+        uploaded = {
           url,
           expiresAt: new Date(Date.now() + SCREENSHOT_DOWNLOAD_TTL_SECONDS * 1000),
         };
@@ -119,6 +134,8 @@ export async function POST(req: Request) {
         );
       }
     }
+
+    if (uploaded) screenshots.push(uploaded);
   }
   // ── end TIER 2 ──────────────────────────────────────────────────────────
 
@@ -178,7 +195,7 @@ export async function POST(req: Request) {
       role: user.role,
     },
     context,
-    screenshot,
+    screenshots,
     modalTitle: body.modalTitle ?? null,
     diagnostics: body.diagnostics ?? null,
     diagnosticsUrl,
@@ -254,6 +271,7 @@ export async function POST(req: Request) {
         user: { id: userId, name: user.name, email: user.email, role: user.role },
         context, // same tenant rows built for the GitHub issue
         issue: issueNumber && githubRepo ? { number: issueNumber, repo: githubRepo } : null,
+        screenshots,
       });
       const res = await fetch(slackWebhookUrl, {
         method: "POST",
@@ -295,10 +313,11 @@ export async function POST(req: Request) {
       pagePath: body.pagePath,
       modalTitle: body.modalTitle ?? null,
       surface: body.modalTitle ? "modal" : "page",
-      hasScreenshot: !!screenshotKey,
-      screenshotKey,
-      screenshotGithubPath,
-      screenshotHosting: screenshot ? (screenshot.expiresAt ? "storage" : "github") : null,
+      hasScreenshot: screenshotKeys.length > 0,
+      screenshotCount: screenshotKeys.length,
+      screenshotKeys,
+      screenshotGithubPaths,
+      screenshotHosting: screenshots.map((s) => (s.expiresAt ? "storage" : "github")),
       hasDiagnostics: !!body.diagnostics,
       diagnosticsGithubPath,
       githubIssueCreated: issueCreated,
@@ -313,7 +332,8 @@ export async function POST(req: Request) {
     severity: body.severity,
     pagePath: body.pagePath,
     surface: body.modalTitle ? "modal" : "page",
-    hasScreenshot: !!screenshotKey,
+    hasScreenshot: screenshotKeys.length > 0,
+    screenshotCount: screenshotKeys.length,
     hasDiagnostics: !!body.diagnostics,
     githubIssueCreated: issueCreated,
     githubIssueNumber: issueNumber,

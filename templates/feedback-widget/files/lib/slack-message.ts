@@ -57,6 +57,12 @@ export type FeedbackSlackInput = {
    * Pass null if you run Slack without the GitHub issue tier.
    */
   issue?: { number: number; repo: string } | null;
+  /**
+   * User-attached screenshots (tier 2), in attach order. Rendered as a links
+   * row so a triager working from Slack can reach every attachment. May be
+   * empty or omitted.
+   */
+  screenshots?: Array<{ url: string; expiresAt: Date | null }>;
 };
 
 /**
@@ -109,7 +115,7 @@ export function buildFeedbackSlackMessage(input: FeedbackSlackInput) {
     fields.push({ type: "mrkdwn", text: `*Issue:*\n<${issueUrl}|#${input.issue.number}>` });
   }
 
-  const blocks = [
+  const blocks: Array<Record<string, unknown>> = [
     {
       type: "header",
       text: { type: "plain_text", text: `${emoji} ${categoryLabel}`, emoji: true },
@@ -119,18 +125,31 @@ export function buildFeedbackSlackMessage(input: FeedbackSlackInput) {
       type: "section",
       text: { type: "mrkdwn", text: `*Message:*\n${truncate(safeMessage, 1500)}` },
     },
-    {
-      type: "context",
-      elements: [
-        { type: "mrkdwn", text: `<${input.pageUrl}|${safePagePath}>` },
-        {
-          type: "mrkdwn",
-          text: `${input.viewport.w}×${input.viewport.h} @${input.viewport.dpr}x · ${escapeSlackMrkdwn(input.language)} · ${escapeSlackMrkdwn(input.timezone)}`,
-        },
-        { type: "mrkdwn", text: safeUA },
-      ],
-    },
   ];
+
+  // TIER 2: screenshot links. The URLs are system-generated (GitHub blob or
+  // presigned storage), not user text, so they need no mrkdwn escaping; the
+  // visible label is a fixed ordinal. Delete this block if you skip screenshots.
+  const screenshots = input.screenshots ?? [];
+  if (screenshots.length > 0) {
+    const links = screenshots.map((shot, i) => `<${shot.url}|Screenshot ${i + 1}>`).join(" · ");
+    blocks.push({
+      type: "context",
+      elements: [{ type: "mrkdwn", text: `:paperclip: ${links}` }],
+    });
+  }
+
+  blocks.push({
+    type: "context",
+    elements: [
+      { type: "mrkdwn", text: `<${input.pageUrl}|${safePagePath}>` },
+      {
+        type: "mrkdwn",
+        text: `${input.viewport.w}×${input.viewport.h} @${input.viewport.dpr}x · ${escapeSlackMrkdwn(input.language)} · ${escapeSlackMrkdwn(input.timezone)}`,
+      },
+      { type: "mrkdwn", text: safeUA },
+    ],
+  });
 
   return { text, blocks };
 }

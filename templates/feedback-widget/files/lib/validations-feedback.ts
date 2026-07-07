@@ -48,6 +48,13 @@ export type FeedbackScreenshotMimeType = (typeof feedbackScreenshotMimeTypes)[nu
 /** 10 MB. Object storage handles bigger, but this protects bandwidth and the GitHub issue UX. */
 export const FEEDBACK_SCREENSHOT_MAX_BYTES = 10 * 1024 * 1024;
 
+/**
+ * Max screenshots per submission. The presign route sizes its rate limit off
+ * this (see screenshot-presign-route.ts) so a full attachment set plus a retry
+ * fits in one window. Keep them in sync.
+ */
+export const FEEDBACK_SCREENSHOT_MAX_COUNT = 4;
+
 export const feedbackScreenshotPresignSchema = z
   .object({
     contentType: z.enum(feedbackScreenshotMimeTypes),
@@ -143,9 +150,15 @@ export const feedbackSubmissionSchema = z.object({
   timezone: z.string().max(64),
   language: z.string().max(32),
   /**
-   * Storage key returned by `/api/feedback/screenshot/presign` after a successful upload.
-   * Server validates the key prefix matches the calling user before embedding it.
+   * Storage keys returned by `/api/feedback/screenshot/presign` (one presign +
+   * PUT per file). Server validates each key's prefix matches the calling user
+   * before embedding it. Capped at `FEEDBACK_SCREENSHOT_MAX_COUNT`.
    * TIER 2 (screenshots) — harmless to keep even if screenshots are disabled.
+   */
+  screenshotKeys: z.array(z.string().max(512)).max(FEEDBACK_SCREENSHOT_MAX_COUNT).optional(),
+  /**
+   * @deprecated Single-attachment field kept for back-compat with clients built
+   * before multi-screenshot support. Merged into `screenshotKeys` server-side.
    */
   screenshotKey: z.string().max(512).nullable().optional(),
   /**

@@ -18,7 +18,7 @@ An implementation is complete when:
 2. The form captures: category, severity, free-text message (bounded, with a minimum so "broken" alone is rejected).
 3. Submission automatically attaches page context: URL, path, viewport, locale, user agent. The user never types this.
 4. The submission lands in the team's triage system as a structured, labeled item (GitHub issue in the reference) carrying user identity and context.
-5. Optional per-tier: screenshot attach/paste (tier 2), silent browser diagnostics (tier 3), real-time post to a team chat channel (tier 4).
+5. Optional per-tier: screenshot attach/paste (tier 2 — multiple screenshots by default, capped at `FEEDBACK_SCREENSHOT_MAX_COUNT`), silent browser diagnostics (tier 3), real-time post to a team chat channel (tier 4).
 6. The user gets clear success/failure/rate-limited feedback in the UI.
 
 ## 3. Invariants (preserve these regardless of design)
@@ -75,6 +75,7 @@ Read HANDOFF.md §11 (gotchas) in full before designing. The expensive ones:
 - Presigned-URL fallbacks rot; say so in the issue body when used.
 - In-memory rate limiting is per-process; multi-instance deployments need Redis or equivalent.
 - Console/fetch/history monkey-patching must be idempotent (guard with an install flag) or hot-reload double-patches.
+- Multi-screenshot: the upload/presign rate limit must be sized to the attachment cap. A submission uploads every screenshot in parallel (one request each), so a per-request limit below `FEEDBACK_SCREENSHOT_MAX_COUNT` 429s a full attachment set mid-batch — and a parallel `Promise.all` rejects the whole submit while the sibling uploads may already have stored orphaned objects. Size it to `MAX_COUNT * 2 + 2` (full set plus a retry). Each committed attachment also needs a unique repo path: suffix the correlation id with the index, or same-submission screenshots collide.
 
 ## 6. Adaptive install procedure
 

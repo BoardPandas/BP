@@ -29,8 +29,10 @@ export type FeedbackGithubInput = {
    */
   context?: Array<{ label: string; value: string }>;
   /**
-   * URL for an optional user-attached screenshot.
+   * User-attached screenshots, in the order the user added them. All are
+   * rendered in a single "### Screenshots" section.
    *
+   * For each entry:
    * - When the image was committed to the GitHub repo via the Contents API,
    *   `expiresAt` is `null` and the URL is a permanent github.com blob link.
    *   If the feedback repo is private, it renders as a clickable link rather
@@ -38,6 +40,14 @@ export type FeedbackGithubInput = {
    * - When we fall back to an object-storage presigned URL, `expiresAt` is set;
    *   that URL is publicly fetchable for its TTL so it embeds inline, with a
    *   note for triagers warning that the link will rot.
+   */
+  screenshots?: Array<{
+    url: string;
+    expiresAt: Date | null;
+  }> | null;
+  /**
+   * @deprecated Single-screenshot field kept for back-compat with callers built
+   * before multi-screenshot support. Merged into `screenshots` when present.
    */
   screenshot?: {
     url: string;
@@ -230,28 +240,36 @@ export function buildFeedbackGithubIssue(input: FeedbackGithubInput): {
   const modalPrefix = input.modalTitle ? `[${truncate(input.modalTitle, 60)}] ` : "";
   const title = truncate(`[feedback/${input.category}] ${modalPrefix}${summary}`, 200);
 
-  const screenshotSection = input.screenshot
-    ? [
-        "### Screenshot",
-        "",
-        ...(input.screenshot.expiresAt
-          ? [
+  // Merge the multi-screenshot array with the deprecated single field.
+  const screenshots = [
+    ...(input.screenshots ?? []),
+    ...(input.screenshot ? [input.screenshot] : []),
+  ];
+
+  const screenshotSection =
+    screenshots.length > 0
+      ? [
+          `### Screenshot${screenshots.length > 1 ? "s" : ""}`,
+          "",
+          ...screenshots.flatMap((shot, i) => {
+            const heading = screenshots.length > 1 ? `**${i + 1}.** ` : "";
+            if (shot.expiresAt) {
               // Presigned URL: publicly fetchable for its TTL, so it embeds
               // inline. Warn triagers that the link will stop resolving.
-              `![Screenshot](${input.screenshot.url})`,
-              "",
-              `_Image link expires ${input.screenshot.expiresAt.toISOString()} (object-storage presigned URL). After expiry, retrieve via the storage admin._`,
-              "",
-            ]
-          : [
-              // GitHub-hosted in a private repo: a blob link, not an inline
-              // image. The image proxy cannot authenticate to a private repo,
-              // but the link resolves permanently for signed-in repo members.
-              `[View screenshot](${input.screenshot.url})`,
-              "",
-            ]),
-      ]
-    : [];
+              return [
+                `${heading}![Screenshot ${i + 1}](${shot.url})`,
+                "",
+                `_Link expires ${shot.expiresAt.toISOString()} (object-storage presigned URL). After expiry, retrieve via the storage admin._`,
+                "",
+              ];
+            }
+            // GitHub-hosted in a private repo: a blob link, not an inline image.
+            // The image proxy cannot authenticate to a private repo, but the
+            // link resolves permanently for signed-in repo members.
+            return [`${heading}[View screenshot ${i + 1}](${shot.url})`, ""];
+          }),
+        ]
+      : [];
 
   const contextRows = (input.context ?? []).map((c) => `- **${c.label}:** ${c.value}`);
 

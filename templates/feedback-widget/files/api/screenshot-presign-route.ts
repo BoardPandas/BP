@@ -9,11 +9,19 @@ import {
   requireUser,
 } from "@/lib/feedback/server-adapter";
 import { getUploadUrl } from "@/lib/feedback/storage";
-import { feedbackScreenshotPresignSchema } from "@/lib/validations/feedback";
+import {
+  FEEDBACK_SCREENSHOT_MAX_COUNT,
+  feedbackScreenshotPresignSchema,
+} from "@/lib/validations/feedback";
 
+// The dialog presigns every attached screenshot in parallel (one call each), so
+// a single submission spends up to FEEDBACK_SCREENSHOT_MAX_COUNT tokens at once.
+// Size the window to hold a full attachment set plus at least one retry,
+// otherwise a legitimate resend 429s individual presigns mid-batch. Still
+// per-user, per 30s, so abuse protection holds.
 const PRESIGN_RATE_LIMIT = {
   windowMs: 30_000,
-  maxRequests: 5,
+  maxRequests: FEEDBACK_SCREENSHOT_MAX_COUNT * 2 + 2,
   keyPrefix: "rl:feedback-screenshot-presign",
 };
 

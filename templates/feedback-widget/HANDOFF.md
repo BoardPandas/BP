@@ -308,6 +308,7 @@ Note: `DialogContent` must not have `overflow-hidden` clipping, since the button
 - **Presigned-URL fallback rots**: when the GitHub commit fails, the issue embeds a 7-day presigned URL and says so. Triage within the window or pull from storage later.
 - **The fetch patch must ignore itself**: `/api/feedback` and analytics ingest URLs are excluded from network capture, otherwise submissions capture their own upload traffic (and analytics noise floods the buffer).
 - **Paste handling**: image paste is ignored while the user is typing into a non-empty input, so pasting text into the message box never gets hijacked; pasting into an empty field still accepts an image (snipping-tool flow).
+- **Multiple screenshots (default)**: users can attach up to `FEEDBACK_SCREENSHOT_MAX_COUNT` (4). Two traps: (1) size the presign/upload rate limit to the cap — a submission presigns every file in parallel, so a limit below the cap 429s a full set mid-batch (the template uses `MAX_COUNT * 2 + 2`); (2) each committed attachment needs a unique repo path, so the correlation id is suffixed with the file index or same-submission screenshots overwrite each other. All screenshots render in one `### Screenshots` issue section (inline for presigned, blob links for GitHub-hosted) and as a links row in Slack — don't shove extras into unrelated context rows.
 - **In-memory rate limiter is per-process**: fine on one instance, advisory behind a load balancer. Use Redis there.
 - **GitHub failures never fail the submission**: issue-create, screenshot-commit, and diagnostics-commit all degrade to warnings. The user always gets their "sent" toast; check logs if issues stop appearing.
 - **Issue body size**: everything rendered into the body is truncated/bounded; the full diagnostics live in the committed JSON. Keep it that way or you will hit GitHub's 65k body cap.
@@ -321,6 +322,7 @@ Note: `DialogContent` must not have `overflow-hidden` clipping, since the button
 - [ ] Valid submit: success toast; issue appears in the triage repo with correct labels, user, and page link.
 - [ ] Second submit within 30s: friendly "please wait" error (429 path).
 - [ ] Tier 2: attach a PNG via picker and via Ctrl+V; issue links a screenshot; a commit lands under `feedback-attachments/<category>/`.
+- [ ] Tier 2 (multiple): attach the max number of screenshots, submit; all appear in one `### Screenshots` section (and the Slack links row), each committed to a distinct path. Attaching past the cap shows the "up to N" message.
 - [ ] Tier 2: oversized (>10MB) and wrong-type files are rejected client-side.
 - [ ] Tier 3: trigger a console.error and a failing fetch, then submit; the issue's Diagnostics section shows them, and a `diagnostics-*.json` commit exists.
 - [ ] Tier 3: tokens/emails logged to console appear redacted in the artifact.
