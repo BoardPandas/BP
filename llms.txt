@@ -11,7 +11,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 ## Concerns
 
 ### Claude Configuration
-- [Claude Config index](practices/claude-config/llms.txt): CLAUDE.md structure, rules, hooks, skills, agents (8 entries)
+- [Claude Config index](practices/claude-config/llms.txt): CLAUDE.md structure, rules, hooks, skills, agents (9 entries)
 
 ### Testing
 - [Testing index](practices/testing/llms.txt): Vitest, Jest, Playwright, coverage patterns (6 entries)
