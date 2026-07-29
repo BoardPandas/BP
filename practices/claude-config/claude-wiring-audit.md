@@ -27,8 +27,22 @@ The intervention makes the symptom worse. Audit before adding anything.
 
 ## Phase 1: automated (5 minutes)
 
-Copy `scripts/check-claude-wiring.mjs` from tcg into the target repo. It is dependency-free
-(node built-ins only) with no hardcoded paths, so it runs as-is.
+Fetch the script into the target repo. It lives in the **public** BP repo, so this needs no
+auth and no local checkout of any other repo. It is dependency-free (node built-ins only)
+with no hardcoded paths, so it runs as-is.
+
+```bash
+mkdir -p scripts
+curl -fsSL -o scripts/check-claude-wiring.mjs \
+  https://raw.githubusercontent.com/BoardPandas/BP/main/practices/claude-config/check-claude-wiring.mjs
+```
+
+This runbook is published at the same place, so a session with no access to the source repo
+can still read the whole procedure:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/BoardPandas/BP/main/practices/claude-config/claude-wiring-audit.md
+```
 
 ```bash
 node scripts/check-claude-wiring.mjs; echo "exit=$?"
