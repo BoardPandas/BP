@@ -48,6 +48,12 @@ curl -fsSL https://raw.githubusercontent.com/BoardPandas/BP/main/practices/claud
 node scripts/check-claude-wiring.mjs; echo "exit=$?"
 ```
 
+> **The fetch above can mask a check B finding.** `mkdir -p scripts` creates the directory
+> before the checker runs, so a rule scoped to `scripts/**` in a repo that had no `scripts/`
+> is reported as live when it was dead at audit time. Record whether `scripts/` existed
+> **before** you started (`git ls-files scripts/ | head -1`), and if it did not, count that
+> glob as dead. This cost one finding on the first outside run of this checklist.
+
 It covers checks A-C and reports E. Expect real findings on any repo that has never run
 it. Then wire it in permanently:
 
@@ -91,6 +97,9 @@ ls -d src/** dashboard/src/** 2>/dev/null | head
 **Fix.** Point the glob at real directories, or drop it. In tcg one rule was scoped to
 `lib/`, `app/`, `worker/`, `api/` -- none of which existed -- while omitting the directory
 holding 1,053 files.
+
+Discount any glob that Phase 1 itself brought into existence -- see the note above `scripts/`.
+A checker cannot distinguish a directory the repo has from one the audit just made.
 
 ### C. Hook matcher syntax
 
