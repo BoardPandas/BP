@@ -11,6 +11,7 @@
  *   3. Tool(pattern) hook matchers       -> hook never fires (that is permissions syntax)
  *   4. always-on context weight          -> every rule competes with every other rule
  *   5. 2>/dev/null || true on a hook     -> failure is unfalsifiable
+ *   6. mid-line @import in CLAUDE.md     -> prose, not an import; the target never loads
  *
  * Portable: node built-ins only, no dependencies, no repo-specific paths. Drop into
  * any Claude Code repo and wire as `node scripts/check-claude-wiring.mjs` in CI.
@@ -27,7 +28,10 @@ import { join } from "node:path";
 const CLAUDE_DIR = ".claude";
 const RULES_DIR = join(CLAUDE_DIR, "rules");
 const SETTINGS = [join(CLAUDE_DIR, "settings.json"), join(CLAUDE_DIR, "settings.local.json")];
-const ROOT_MD = "CLAUDE.md";
+// Claude Code loads project instructions from EITHER location. Checking only the root
+// path silently undercounts a repo that uses .claude/CLAUDE.md: one repo was reported
+// at ~940 always-on tokens when the real figure was ~5,100.
+const ROOT_MDS = ["CLAUDE.md", join(CLAUDE_DIR, "CLAUDE.md")];
 
 // Rough budget for text injected into EVERY session before the user types. Not a hard
 // contract; it exists so growth is a deliberate decision rather than a slow accretion.
@@ -178,17 +182,31 @@ for (const settingsPath of SETTINGS) {
 let alwaysOnBytes = 0;
 const budget = [];
 
-if (exists(ROOT_MD)) {
-	const text = read(ROOT_MD) ?? "";
+for (const rootMd of ROOT_MDS) {
+	if (!exists(rootMd)) continue;
+	const text = read(rootMd) ?? "";
 	alwaysOnBytes += Buffer.byteLength(text);
-	budget.push([ROOT_MD, Buffer.byteLength(text)]);
+	budget.push([rootMd, Buffer.byteLength(text)]);
 
 	for (const line of text.split("\n")) {
 		const m = line.match(/^@(\S+)/);
-		if (!m) continue;
+		if (!m) {
+			// An @path that is NOT at column 0 is not an import -- it renders as prose and
+			// the target is never loaded. To a human it reads exactly like a working
+			// import, which is how "See @README.md for full project details" sat in one
+			// repo as a dead pointer to 24 KB of docs nobody was reading.
+			const inline = line.match(/\S\s*@([A-Za-z0-9_./-]+\.md)\b/);
+			if (inline) {
+				warnings.push(
+					`${rootMd}: "@${inline[1]}" is mid-line, so it is prose, not an import, and ` +
+						`that file never loads. Move it to column 0 to import it, or drop the "@".`,
+				);
+			}
+			continue;
+		}
 		const target = m[1];
 		if (!exists(target)) {
-			errors.push(`${ROOT_MD}: @import target ${target} does not exist.`);
+			errors.push(`${rootMd}: @import target ${target} does not exist.`);
 			continue;
 		}
 		const size = Buffer.byteLength(read(target) ?? "");
