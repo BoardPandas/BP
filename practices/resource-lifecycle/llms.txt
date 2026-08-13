@@ -1,0 +1,7 @@
+# Resource Lifecycle Best Practices
+
+> Proven patterns for bounding the lifetime of long-lived in-memory resources: session maps, connection pools, caches, spawned child processes, subscriptions, and timers.
+
+## Entries
+
+- [Every long-lived in-memory resource needs an owner, a TTL, a cap, and a drain](owner-ttl-cap-drain.md): If the only thing that frees a resource is a well-behaved peer, it will leak — peers close laptops and lose networks. Give every cross-request resource one owner whose release cascades, a `lastSeenAt` stamp plus an `unref()`'d sweeper, per-principal and global caps enforced before acquisition, and a SIGTERM drain that clears timers first. Off-heap resources (child processes, sockets, handles) never appear in a heap snapshot and never trigger V8's heap-limit path, so the container dies by cgroup OOM at exit 137 with no banner and heap profiling chases the wrong thing. RECOMMENDED.
