@@ -66,3 +66,6 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 
 ### User Feedback
 - [User Feedback index](practices/user-feedback/llms.txt): In-app feedback widget to GitHub-issue pipeline, screenshots, redacted browser diagnostics; code template in templates/feedback-widget/ (1 entry)
+
+### Resource Lifecycle
+- [Resource Lifecycle index](practices/resource-lifecycle/llms.txt): Bounded lifetimes for long-lived in-memory resources (session maps, pools, caches, spawned children, timers): one owner whose release cascades, a lastSeenAt stamp plus an unref'd sweeper, caps enforced before acquisition, and a SIGTERM drain that clears timers first — because anything freed only by a well-behaved peer will leak, and off-heap leaks die by cgroup OOM at exit 137 with no heap banner (1 entry)
