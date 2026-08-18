@@ -14,7 +14,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Claude Config index](practices/claude-config/llms.txt): CLAUDE.md structure, rules, hooks, skills, agents (9 entries)
 
 ### Testing
-- [Testing index](practices/testing/llms.txt): Vitest, Jest, Playwright, coverage patterns (6 entries)
+- [Testing index](practices/testing/llms.txt): Vitest, Jest, Playwright, coverage patterns, and reproducing load-dependent flakes under forced CPU contention (7 entries)
 
 ### Linting & Formatting
 - [Linting & Formatting index](practices/linting-formatting/llms.txt): Biome, ESLint, auto-format hooks (3 entries)
