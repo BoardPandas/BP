@@ -1,6 +1,6 @@
 # Deployment Best Practices
 
-> Proven patterns for Docker, Cloudflare Pages, Northflank, and deployment pipelines.
+> Proven patterns for Docker, Cloudflare, Railway, and deployment pipelines.
 
 ## Entries
 

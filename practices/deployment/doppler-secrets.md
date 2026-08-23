@@ -8,7 +8,7 @@ applies-to: [node, typescript, docker]
 # Doppler as Single Source of Truth for Secrets
 
 ## PATTERN
-Use Doppler as the centralized secrets manager across all environments. Each project has three configs: `dev`, `stg`, and `prd`. Local development uses `doppler run` to inject secrets, with `.env.local` as offline fallback only. Production secrets sync to hosting providers (Cloudflare, Northflank) via Doppler integrations or CLI.
+Use Doppler as the centralized secrets manager across all environments. Each project has three configs: `dev`, `stg`, and `prd`. Local development uses `doppler run` to inject secrets, with `.env.local` as offline fallback only. Production secrets sync to hosting providers (Cloudflare, Railway) via Doppler integrations or CLI.
 
 ## WHY
 Scattered `.env` files across developer machines and hosting dashboards lead to drift, accidental commits, and "works on my machine" failures. Doppler provides a single source of truth with audit logging, environment separation, and automatic sync to deployment targets.
@@ -40,7 +40,7 @@ doppler secrets --json --project bp-website --config prd \
   | jq -c 'with_entries(.value = .value.computed)' \
   | wrangler secret bulk
 
-# Sync to Northflank (via Doppler integration or env vars)
+# Sync to Railway (native Doppler integration: continuous sync, no code)
 ```
 
 ## CHECK
@@ -56,7 +56,7 @@ How to verify if a repo already follows this:
 2. Add all environment variables to each config
 3. Document variables in CLAUDE.md with their purpose and type (secret vs public)
 4. Update dev scripts to use `doppler run` prefix
-5. Set up Doppler sync to hosting provider (Cloudflare/Northflank integration)
+5. Set up Doppler sync to hosting provider (Cloudflare via `wrangler secret bulk`, Railway via the native Doppler integration)
 6. Remove any committed `.env` files and add to `.gitignore`
 
 ## NOTES

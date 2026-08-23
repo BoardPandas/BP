@@ -14,7 +14,7 @@ practices/
   testing/            # Vitest, Jest, Playwright, coverage patterns
   linting-formatting/ # Biome, ESLint, auto-format hooks
   error-handling/     # Structured logging, error context
-  deployment/         # Docker, Cloudflare, Northflank, Doppler
+  deployment/         # Docker, Cloudflare, Railway, Doppler
   monorepo/           # pnpm + Turborepo, workspaces
   versioning/         # Semver, changelog enforcement
   safety/             # Read-only-first, permissions gates, hooks
