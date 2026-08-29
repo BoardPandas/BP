@@ -29,7 +29,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Validation index](practices/validation/llms.txt): Validator/grader/scanner design -- what a result can and cannot prove; floor-not-ceiling, monotonic verdict adjustment (1 entry)
 
 ### Deployment
-- [Deployment index](practices/deployment/llms.txt): Docker multi-stage, Cloudflare, Railway, Doppler (9 entries)
+- [Deployment index](practices/deployment/llms.txt): Docker multi-stage, Cloudflare, Railway, Doppler, and evaluating the built artifact in CI so a bundle that compiles but cannot start is caught before the deploy (10 entries)
 
 ### Monorepo
 - [Monorepo index](practices/monorepo/llms.txt): pnpm + Turborepo, shared packages, workspaces (3 entries)
