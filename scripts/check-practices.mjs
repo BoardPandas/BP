@@ -103,7 +103,13 @@ for (const concern of concerns) {
 	for (const file of entryFiles) {
 		const rel = `${dir}/${file}`;
 		if (!exists(rel)) { errors.push(`${idxPath}: lists ${file}, which does not exist.`); continue; }
-		const body = readFileSync(rel, "utf8");
+		// Entry files are checked for CRs too, not just the indexes. A contents-API
+		// write stores bytes verbatim -- no git clean filter runs -- so .gitattributes
+		// cannot stop CRs arriving that way; only a check can. LL-G had exactly this,
+		// and its guard initially inspected only llms.txt, so an entry CR passed clean.
+		const rawEntry = readFileSync(rel);
+		if (rawEntry.includes(13)) errors.push(`${rel}: contains CR bytes (see .gitattributes).`);
+		const body = rawEntry.toString("utf8");
 		const fm = /^---\r?\n([\s\S]*?)\r?\n---/.exec(body);
 		if (!fm) { errors.push(`${rel}: no YAML frontmatter.`); continue; }
 		const field = (n) => { const m = new RegExp(`^${n}:[ \t]*(.*)$`, "m").exec(fm[1]); return m ? m[1].trim() : null; };
