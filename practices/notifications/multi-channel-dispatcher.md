@@ -3,6 +3,7 @@ concern: notifications
 tags: [notifications, fan-out, email, slack, in-app, failure-isolation]
 priority: foundational
 tech: [typescript, nodejs]
+applies-to: [typescript, nodejs]
 ---
 # Multi-channel notification dispatcher with per-channel failure isolation
 
@@ -117,6 +118,22 @@ export async function dispatchPartnerNotification(args: {
 - You have more than one notification channel and the same event fans out to multiple of them.
 - Channel choices are per-tenant or per-event-type (not a single global config).
 - One channel can fail independently of the others (most do -- Resend, Slack webhooks, in-app DB writes are unrelated dependencies).
+
+## CHECK
+
+How to verify a repo already follows this:
+- [ ] Each channel is wrapped in its own try/catch, so one channel failing cannot abort the others
+- [ ] Per-recipient sends are guarded **inside** the loop, not by one try/catch around it
+- [ ] The dispatcher returns per-channel attempted/sent counts rather than a bare boolean
+- [ ] A null/undefined channel config resolves to an explicit documented default
+- [ ] Caught failures are logged with channel and recipient, and appear in the result rather than being swallowed
+
+## IMPLEMENT
+
+1. Define an explicit `Channels` type and resolve null/undefined to your intended default.
+2. Give every channel its own try/catch; for per-recipient channels put the guard inside the loop.
+3. Accumulate a structured result (attempted vs sent, per channel) and return it to the caller.
+4. Log each caught failure with channel and recipient, and add a test asserting that one failing channel still delivers the rest.
 
 ## NOTES
 

@@ -1,3 +1,14 @@
+# Normalize every text file to LF in the repository and on checkout.
+#
+# eol=lf (not just text=auto) is the half that matters: it pins the CHECKOUT, so a
+# Windows clone with core.autocrlf=true cannot write CRs back in. Without it, a
+# Windows write turns an index into CRLF (one CR per line) and a later tool that
+# treats a lone CR as a line terminator rewrites it with LF only -- every CR
+# becoming a real blank line. LL-G's master index went 257 -> 3071 lines that way
+# while its actual content stayed flat, and "update one entry count" landed as a
+# 768-insertion diff. Fix the cause here rather than re-collapsing blank runs later.
+* text=auto eol=lf
+
 # Shell scripts must use LF line endings, or the shebang breaks on
 # Git Bash/macOS/Linux with "bad interpreter: bash\r".
 *.sh text eol=lf

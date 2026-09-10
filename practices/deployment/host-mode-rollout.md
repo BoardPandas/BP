@@ -2,6 +2,8 @@
 concern: deployment
 priority: recommended
 tags: [next-js, multi-tenancy, subdomain, dns, rollout, env-config]
+tech: [nextjs, typescript, better-auth]
+applies-to: [nextjs, multi-tenant]
 ---
 # Env-Driven Host-Mode Helper for Staged Subdomain Rollout
 
@@ -114,6 +116,22 @@ if (host === "admin.example.com") { /* ... */ }
 // Hardcoded route-group-to-host coupling without an env seam.
 // Future you has to edit code, not config, when DNS finally arrives.
 ```
+
+## CHECK
+
+How to verify a repo already follows this:
+- [ ] Host branching lives in one pure helper taking `(host, config)`, not scattered `request.headers.get("host")` comparisons
+- [ ] With neither host env var set the helper returns `single` and the middleware is a no-op
+- [ ] An unknown host (preview deploy, localhost) falls back to `single` rather than erroring or redirecting
+- [ ] Hosts come from env (`PLATFORM_HOST` / `APP_HOST`), never hardcoded
+- [ ] Normalization lowercases, strips the port, and strips a leading `www.`
+
+## IMPLEMENT
+
+1. Add the pure `getHostMode` / `normalizeHost` / `readHostConfigFromEnv` helper.
+2. Branch in middleware on the returned mode, with `single` doing nothing at all.
+3. Unit-test all three modes plus the unknown-host fallback **while still on one origin** -- that is the whole point: the architecture lands before DNS exists.
+4. At cutover set `PLATFORM_HOST`, `APP_HOST`, `COOKIE_DOMAIN` and `TRUSTED_ORIGINS` in the secret store, and update external OAuth redirect URIs.
 
 ## NOTES
 

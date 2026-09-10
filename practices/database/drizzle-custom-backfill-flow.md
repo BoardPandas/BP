@@ -2,6 +2,8 @@
 concern: database
 priority: recommended
 tags: [drizzle-orm, drizzle-kit, migrations, backfill, postgres]
+tech: [drizzle-orm, drizzle-kit, postgres, typescript]
+applies-to: [drizzle-orm, postgres]
 ---
 # Drizzle-Kit `--custom` Workflow for Data Backfill + NOT NULL Flip
 
@@ -59,6 +61,23 @@ ALTER TABLE child_table ALTER COLUMN parent_id SET NOT NULL;
 // Updating the schema AFTER hand-writing the custom SQL.
 // drizzle-kit detects the NOT NULL diff and emits an extra (now redundant) migration.
 ```
+
+## CHECK
+
+How to verify a repo already follows this:
+- [ ] The Drizzle schema declares the column `.notNull()` and a hand-written migration exists under `drizzle/` -- schema-first, not a trailing auto-generated ALTER
+- [ ] Every backfill migration puts `SET NOT NULL` last, after the UPDATEs, with `--> statement-breakpoint` between statements
+- [ ] `when` in `drizzle/meta/_journal.json` is strictly increasing by `idx` (a behind clock silently skips the migration)
+- [ ] Applied migrations are confirmed against `drizzle.__drizzle_migrations`, not drizzle-kit's "applied successfully" message
+
+## IMPLEMENT
+
+1. Flip the column to `.notNull()` in the Drizzle schema **first**, so the snapshot reflects the end state and the next `generate` does not emit a duplicate ALTER.
+2. `pnpm exec drizzle-kit generate --custom --name=<phase>_<description>` to get an empty stub plus an updated snapshot.
+3. Hand-write the SQL in parent -> child order, `--> statement-breakpoint` between statements, `SET NOT NULL` last.
+4. Open `drizzle/meta/_journal.json` and confirm the new entry's `when` exceeds every prior `when`; hand-bump if your clock was behind.
+5. `pnpm db:migrate` with `DATABASE_URL` pointed at the public proxy URL (PgBouncer's internal hostname does not resolve off-platform).
+6. Verify with `SELECT count(*) FROM drizzle.__drizzle_migrations` and `\d <table>`.
 
 ## NOTES
 

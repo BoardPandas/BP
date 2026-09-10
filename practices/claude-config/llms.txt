@@ -13,3 +13,11 @@
 - [Phase-Split Remediation Plans Sized to Context Budget](phase-split-remediation-plans.md): One plan file, many cold sessions: top status line, one phase per session (security first), verified file:line findings with fail-closed fixes, pre-seeded gotchas. RECOMMENDED.
 - [Byte-Budget CLAUDE.md and Flow Detail Downward](byte-budget-claude-md-detail-downward.md): Govern CLAUDE.md size in bytes (line budgets are gamed by long lines), keep module entries as 3-to-4-line pointers with full designs in docs/features/, and calibrate stated numeric limits to measured p95 reality. FOUNDATIONAL.
 - [Verify the .claude Wiring in CI, Do Not Trust That It Works](verify-claude-wiring-in-ci.md): Rule scoping and hooks fail silently when miswired, so a repo runs for months with dead enforcement and nothing surfaces it; a dependency-free pre-install gate asserts paths: (not Cursor globs:/alwaysApply:, which invert scoping), that every glob matches a real file, and that hook matchers are bare tool names, plus reports the always-on token budget. FOUNDATIONAL.
+
+## Companion files
+
+Not practice entries, so they are not counted above -- but nothing else links them, and a
+file nothing links is a file nobody finds.
+
+- [claude-wiring-audit.md](claude-wiring-audit.md): portable two-phase checklist for auditing another repo's `.claude/` wiring, including the manual checks a script cannot make.
+- [check-claude-wiring.mjs](check-claude-wiring.mjs): the dependency-free guard that Phase 1 fetches and CI runs.

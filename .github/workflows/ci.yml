@@ -1,0 +1,28 @@
+name: CI
+
+# BP had no CI and no guard script, so every "(N entries)" count in the master index
+# was maintained by hand in a second place and verified by nobody, and a file that
+# nothing linked was indistinguishable from a file that did not exist. The guard
+# below catches only SILENT defects -- count drift, unreachable files, schema drift,
+# and missing CHECK/IMPLEMENT sections that leave /apply-practice nothing to act on.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Practices guard
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # No dependencies -- Node built-ins only, so nothing to install.
+      - name: Counts, reachability, schema and required sections
+        run: node scripts/check-practices.mjs

@@ -8,6 +8,9 @@ FOUNDATIONAL = universal patterns every repo should follow -- always load these
 RECOMMENDED = strong patterns for matching tech stacks -- load when relevant
 OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 
+> Keep each line below to one clause naming the concern and its scope. The specific
+> practices belong on the shelf, not here -- this file is a router that every session loads.
+
 ## Concerns
 
 ### Claude Configuration
@@ -23,7 +26,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Error Handling index](practices/error-handling/llms.txt): Structured logging, error context propagation (2 entries)
 
 ### LLM Resilience
-- [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification, directional reconciliation of LLM self-assessments vs deterministic checks, depth-scaled output budgets + truncated-JSON salvage (3 entries)
+- [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification, and reconciling LLM self-assessments against deterministic checks (3 entries)
 
 ### Validation
 - [Validation index](practices/validation/llms.txt): Validator/grader/scanner design -- what a result can and cannot prove; floor-not-ceiling, monotonic verdict adjustment (1 entry)
@@ -68,4 +71,4 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [User Feedback index](practices/user-feedback/llms.txt): In-app feedback widget to GitHub-issue pipeline, screenshots, redacted browser diagnostics; code template in templates/feedback-widget/ (1 entry)
 
 ### Resource Lifecycle
-- [Resource Lifecycle index](practices/resource-lifecycle/llms.txt): Bounded lifetimes for long-lived in-memory resources (session maps, pools, caches, spawned children, timers): one owner whose release cascades, a lastSeenAt stamp plus an unref'd sweeper, caps enforced before acquisition, and a SIGTERM drain that clears timers first — because anything freed only by a well-behaved peer will leak, and off-heap leaks die by cgroup OOM at exit 137 with no heap banner plus how to make that drain provable from outside the process: exec so the app is supervised, exitCode not exit() so the completion line is not discarded, and an app-level log line as the source of truth because wrappers overwrite the exit code (2 entries)
+- [Resource Lifecycle index](practices/resource-lifecycle/llms.txt): Bounded lifetimes for long-lived in-memory resources (session maps, pools, caches, spawned children, timers), and making a SIGTERM drain provable from outside the process (2 entries)

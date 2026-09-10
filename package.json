@@ -1,0 +1,11 @@
+{
+  "name": "bp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BP -- machine-readable knowledge base of proven coding practices",
+  "scripts": {
+    "check": "node scripts/check-practices.mjs",
+    "check:practices": "node scripts/check-practices.mjs"
+  },
+  "license": "MIT"
+}

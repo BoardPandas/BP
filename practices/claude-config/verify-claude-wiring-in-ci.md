@@ -117,6 +117,10 @@ How to verify if a repo already follows this:
   a chronically-ignored rule into a hook over restating it more forcefully.
 - Complements `path-scoped-rules.md` and `hook-configuration.md`, which cover how to
   author these; this covers proving they work.
+- The manual half of this audit lives in `claude-wiring-audit.md` in this folder: a portable
+  Phase 1 (automated, the script below) + Phase 2 (the checks a script cannot do -- has any
+  hook ever actually fired, silenced hooks, blocking hooks that never reach stderr). Run it
+  on any repo that has never been audited.
 - Related gotchas: `kb/claude-code/cursor-frontmatter-keys-ignored.md`,
   `kb/claude-code/hook-matcher-tool-names-only.md`,
   `kb/claude-code/hook-empty-path-formats-repo.md` in LL-G.
