@@ -56,12 +56,12 @@ Edge cases, caveats, related practices.
 
 ## Adding a New Practice
 
-Run `/add-practice` from any repo session. The skill collects the details and writes the entry file, updates the concern `llms.txt`, and updates the master `llms.txt` entry count atomically.
+Run `/add-practice` from any repo session. The skill collects the details and proposes the entry through Roundtable's `kb_propose`, which checks it for private details and duplicates, then writes the entry file, the concern `llms.txt` and the master `llms.txt` entry count as one commit.
 
-To add manually:
+Commit an entry directly only to create a new concern, which `kb_propose` cannot do. Publish every other entry with `/add-practice` (Roundtable's `kb_propose`). A new concern is one commit:
 1. Create `practices/<concern>/<slug>.md` using the entry format above
-2. Append a bullet to `practices/<concern>/llms.txt` under `## Entries`
-3. Increment the entry count in the master `llms.txt` for that concern
+2. Create `practices/<concern>/llms.txt` with the entry's bullet under `## Entries`
+3. Add the concern's line to the master `llms.txt`, with a count of 1 entry
 
 ## Skills
 
