@@ -20,7 +20,6 @@ Each entry file uses this structure:
 concern: <concern-category>
 tech: [tech1, tech2]
 priority: foundational|recommended|optional
-source-repo: <repo-name>
 applies-to: [tech1, tech2]
 ---
 # Entry Title
@@ -47,6 +46,8 @@ Steps to adopt this in a repo that doesn't have it:
 ## NOTES
 Edge cases, caveats, related practices.
 ```
+
+`source-repo: <repo-name>` is optional. Entries published through Roundtable leave it out: this repository is public, so Roundtable keeps the source repo and commit in its private evidence log instead. Older entries may still carry it.
 
 ## Priority Legend
 
@@ -75,9 +76,9 @@ Commit an entry directly only to create a new concern, which `kb_propose` cannot
 
 ## Practice Scout (Auto-Discovery)
 
-A global Stop hook fires at the end of every Claude Code session. The practice-scout agent (Haiku) checks if any commits were made during the session, analyzes their diffs, checks BP for existing coverage, and auto-creates entries for novel reusable patterns. Most sessions produce nothing -- only infrastructure, tooling, and configuration patterns are captured.
+The practice-scout agent (`.claude/agents/practice-scout.md`, Haiku) is launched from a personal global config -- a Stop hook, or a pre-commit rule in a global CLAUDE.md -- not from anything in this repository. It reads the session's recent commits or the staged diff, checks BP for existing coverage with `kb_search`, and proposes at most one entry per run for a novel reusable pattern through Roundtable's `kb_propose`. It never writes or commits to BP itself, and when Roundtable is not available it stops and reports instead of falling back. Most runs produce nothing -- only infrastructure, tooling, and configuration patterns are captured.
 
-Entries created by the scout include "Auto-discovered by practice-scout" in NOTES with the source repo and commit hash.
+Entries proposed by the scout end their NOTES with "Auto-discovered by practice-scout." The source repo and commit go to Roundtable's private evidence log, not the published entry.
 
 ## KB Location
 

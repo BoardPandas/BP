@@ -122,9 +122,10 @@ for (const concern of concerns) {
 		if (!p) errors.push(`${rel}: frontmatter has no priority:.`);
 		else if (!PRIORITIES.has(p.toLowerCase())) errors.push(`${rel}: priority "${p}" is not foundational/recommended/optional.`);
 
-		// Provenance is a nicety, not a gate: three entries predate the convention and
-		// their source repo is not recorded anywhere, and guessing it would be worse.
-		for (const opt of ["source-repo", "applies-to"]) if (!field(opt)) warnings.push(`${rel}: no ${opt}:.`);
+		// source-repo: is optional and not checked at all: BP is public, so entries published
+		// through Roundtable leave it out and Roundtable keeps the source repo in its private
+		// evidence log instead.
+		if (!field("applies-to")) warnings.push(`${rel}: no applies-to:.`);
 
 		const heads = body.split(/\r?\n/).map((l) => l.trim());
 		for (const s of ["PATTERN", "CHECK", "IMPLEMENT"]) {
