@@ -46,7 +46,7 @@ How to verify if a repo already follows this:
 1. Create `CHANGELOG.md` with initial structure:
    ```markdown
    # Changelog
-   All notable changes documented per [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+   All notable changes documented per [Keep a Changelog](https://keepachangelog.com/en/2.0.0/).
 
    ## [Unreleased]
    ```

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/2.0.0/),
 and this project does not follow Semantic Versioning: it makes no versioned releases, and every change is listed under [Unreleased]. The `version` in `package.json` (Major.Minor.Patch) is bumped on hand-made commits and marks no release: it has no heading here and no tag. Practices that Roundtable publishes are not listed here; `git log` has them.
 
 ## [Unreleased]
@@ -13,6 +13,7 @@ and this project does not follow Semantic Versioning: it makes no versioned rele
 - **Added this CHANGELOG**, mirroring the LL-G knowledge-base repo so config changes are tracked here too.
 
 ### Changed
+- **The changelog follows Keep a Changelog 2.0.0.** 2.0.0 keeps the 1.1.0 format, so only the header link moves and no entry is rewritten.
 - **The changelog header says how this repository is versioned.** BP makes no versioned releases, so the header no longer leaves Semantic Versioning to be assumed: every change is listed under `[Unreleased]`, and the `package.json` version is bumped on hand-made commits with no heading and no tag. Sections follow the Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security).
 - **practice-scout proposes through Roundtable instead of writing to BP.** The agent used to write the entry file and both indexes into a local BP checkout itself, skipping every check `/add-practice` now goes through. It now looks for coverage with `kb_search`, strips client names, hostnames and the source repo's name, and proposes at most one entry per run with `kb_propose`; its `tools:` list has no Write or Edit. When Roundtable is not available it stops and reports, never falling back to a direct write. The source repo and commit go to Roundtable's private evidence log, so the NOTES line is now just "Auto-discovered by practice-scout." The scout's launcher -- a Stop hook or a pre-commit rule in a personal global config -- lives outside this repository and was not changed; the agent reads the staged diff when run before a commit and the last hour's commits otherwise.
 - **`source-repo:` is optional.** Entries published through Roundtable omit it, because this repository is public and Roundtable keeps the source repo in its private evidence log. `scripts/check-practices.mjs` no longer warns when it is absent (it still warns on a missing `applies-to:`), and the entry format in `CLAUDE.md` no longer lists it.
