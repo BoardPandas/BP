@@ -22,9 +22,13 @@ practices/
   design-systems/     # OKLCH tokens, guardrails, iframe isolation
   environment/        # Doppler + .env.local, secrets
   knowledge-bases/    # YAML frontmatter, two-level indexes
+references/
+  openrouter/         # OpenRouter Agent SDK, Client SDKs and full API reference for coding agents
 ```
 
 Each concern directory contains an `llms.txt` index and individual `.md` entry files.
+
+`references/` holds vendor reference material compiled from official documentation. It is not practice entries, so it has no frontmatter and `npm run check` does not scan it. Start each reference at its `00-INDEX.md`.
 
 ## Usage
 

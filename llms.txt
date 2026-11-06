@@ -72,3 +72,9 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 
 ### Resource Lifecycle
 - [Resource Lifecycle index](practices/resource-lifecycle/llms.txt): Bounded lifetimes for long-lived in-memory resources (session maps, pools, caches, spawned children, timers), and making a SIGTERM drain provable from outside the process (2 entries)
+
+## References
+
+> Vendor reference material, not practice entries. Load the index, then only the file a task needs.
+
+- [OpenRouter reference index](references/openrouter/00-INDEX.md): OpenRouter Agent SDK, Client SDKs (TS/Python/Go) and full API reference, split by section with a task map
