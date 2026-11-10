@@ -47,7 +47,7 @@ Steps to adopt this in a repo that doesn't have it:
 Edge cases, caveats, related practices.
 ```
 
-`source-repo: <repo-name>` is optional. Entries published through Roundtable leave it out: this repository is public, so Roundtable keeps the source repo and commit in its private evidence log instead. Older entries may still carry it.
+`source-repo: <repo-name>` is optional. Omit private repository names and source evidence because this repository is public. Older entries may still carry public source metadata.
 
 ## Priority Legend
 
@@ -57,9 +57,9 @@ Edge cases, caveats, related practices.
 
 ## Adding a New Practice
 
-Run `/add-practice` from any repo session. The skill collects the details and proposes the entry through Roundtable's `kb_propose`, which checks it for private details and duplicates, then writes the entry file, the concern `llms.txt` and the master `llms.txt` entry count as one commit.
+Run `/add-practice` from any repo session. The skill collects the details and proposes the entry through authenticated `gh`, after privacy and duplicate review, and writes the entry file, the concern `llms.txt` and the master `llms.txt` entry count as one commit.
 
-Commit an entry directly only to create a new concern, which `kb_propose` cannot do. Publish every other entry with `/add-practice` (Roundtable's `kb_propose`). A new concern is one commit:
+Use the skill for both existing and new categories. Publish the entry and both indexes as one atomic GitHub commit. A new category requires:
 1. Create `practices/<concern>/<slug>.md` using the entry format above
 2. Create `practices/<concern>/llms.txt` with the entry's bullet under `## Entries`
 3. Add the concern's line to the master `llms.txt`, with a count of 1 entry
@@ -76,9 +76,9 @@ Commit an entry directly only to create a new concern, which `kb_propose` cannot
 
 ## Practice Scout (Auto-Discovery)
 
-The practice-scout agent (`.claude/agents/practice-scout.md`, Haiku) is launched from a personal global config -- a Stop hook, or a pre-commit rule in a global CLAUDE.md -- not from anything in this repository. It reads the session's recent commits or the staged diff, checks BP for existing coverage with `kb_search`, and proposes at most one entry per run for a novel reusable pattern through Roundtable's `kb_propose`. It never writes or commits to BP itself, and when Roundtable is not available it stops and reports instead of falling back. Most runs produce nothing -- only infrastructure, tooling, and configuration patterns are captured.
+The practice-scout agent (`.claude/agents/practice-scout.md`, Haiku) can be launched by a personal hook or instruction. It reads recent commits or the staged diff, searches BP on GitHub for existing coverage, and uses the add-practice workflow for at most one evidenced, reusable practice. Publishing requires session authorization, privacy review, one atomic GitHub commit and exact-commit CI verification. Most runs produce nothing.
 
-Entries proposed by the scout end their NOTES with "Auto-discovered by practice-scout." The source repo and commit go to Roundtable's private evidence log, not the published entry.
+Scout entries end NOTES with "Auto-discovered by practice-scout." Private source evidence stays out of the public entry and commit message.
 
 ## KB Location
 

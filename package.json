@@ -1,6 +1,6 @@
 {
   "name": "bp",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": true,
   "description": "BP -- machine-readable knowledge base of proven coding practices",
   "scripts": {
