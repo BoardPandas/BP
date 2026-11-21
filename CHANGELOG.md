@@ -7,6 +7,11 @@ and this project does not follow Semantic Versioning: it makes no versioned rele
 
 ## [Unreleased]
 
+## [1.2.3] - 2026-11-21
+
+### Added
+- Dependabot version updates: weekly pull requests for github-actions, npm dependencies, with minor and patch updates grouped into one pull request per ecosystem. Dependabot alerts and security updates are enabled in the repository settings.
+
 ### Added
 - **Google Antigravity (`agy`) and Codex mirror generation** (`scripts/sync-codex.mjs`, `scripts/sync-antigravity.mjs`, `.claude/scripts/_antigravity-hook.sh`, `AGENTS.md`, `.agents/`, `.codex/`): mirrors `.claude/` skills, agents, rules, and hooks to both harnesses, enforces Antigravity's 24 KB file and 1,024-char description ceilings, and translates Antigravity hook events onto `.claude/scripts/*.sh` (`scripts/antigravity-hooks.test.mjs`, `scripts/sync-codex.test.mjs`).
 - **An OpenRouter reference for coding agents** at `references/openrouter/`, the first entry in a new top-level `references/` folder for vendor material. It documents the Agent SDK (`@openrouter/agent`), the TypeScript, Python and Go Client SDKs, every API operation, and the platform features those APIs expose (routing, tools, plugins, multimodal, caching, auth, privacy, governance). It was compiled from https://openrouter.ai/docs and the OpenAPI spec as published on 2026-11-06. `00-INDEX.md` maps about 60 common tasks to the file and subsection that cover them, and gives each subsection's starting line. The 12 section files run from 4K to 66K tokens each, and `§N.M` cross-references link between them. `OpenRouter-Developer-Reference.md` is the same content as one file (about 450K tokens). Where the guides, the generated SDK docs and the OpenAPI spec disagree, the text flags the conflict. The master `llms.txt` gains a References section pointing at the index, and `npm run check` does not scan `references/`.
