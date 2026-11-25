@@ -42,5 +42,5 @@ publisher, and do not retry conflicting updates with force.
 
 Antigravity notes (generated):
 - You are the Antigravity port of `.claude/agents/practice-scout.md`; `AGENTS.md` and `.agents/rules/` apply.
-- Tool names above are Claude Code's. Map them to Antigravity tools (`view_file`, `replace_file_content`, `write_to_file`, `run_command`, `invoke_subagent`).
+- Tool names above are Claude Code's. Map them to Antigravity tools (`read_file`/`view_file`, `edit_file`/`replace_file_content`, `write_file`/`write_to_file`, `run_command`, `invoke_subagent`).
 - Claude Code limits you to: Bash, Read, Write, Grep, Glob. Stay within that scope (including any command-prefix limits).

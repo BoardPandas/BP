@@ -7,6 +7,11 @@ and this project does not follow Semantic Versioning: it makes no versioned rele
 
 ## [Unreleased]
 
+## [1.2.4] - 2026-11-25
+
+### Changed
+- Synced Google Antigravity CLI/ACP 1.5 hook, agent, and mirror support from `claude-code-bootstrap` 0.30.0 (`scripts/sync-codex.mjs`, `scripts/sync-antigravity.mjs`, `scripts/antigravity-format.mjs`, `.claude/scripts/_antigravity-hook.sh`, `init-repo`, and `update-practices`): supports both modern CLI/ACP and legacy IDE tool names, uses cross-platform relative hook commands without POSIX `$(...)`, enforces `.claude/settings.json` `permissions.deny` via `--enforce-deny`, flushes queued advice via `systemMessage`, maps `opus`/`sonnet` agents to `model: inherit` with read-only sandboxed `run_command` where needed, and regenerates `AGENTS.md`, `.agents/`, and `.codex/`.
+
 ## [1.2.3] - 2026-11-21
 
 ### Added
