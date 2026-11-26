@@ -50,7 +50,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Design Systems index](practices/design-systems/llms.txt): OKLCH tokens, guardrails, UX laws review, iframe isolation (4 entries)
 
 ### Environment
-- [Environment index](practices/environment/llms.txt): Doppler + .env.local, secrets encryption (1 entry)
+- [Environment index](practices/environment/llms.txt): Doppler + .env.local, secrets encryption (2 entries)
 
 ### Knowledge Bases
 - [Knowledge Bases index](practices/knowledge-bases/llms.txt): YAML frontmatter, two-level indexes, ID conventions (1 entry)

@@ -5,3 +5,4 @@
 ## Entries
 
 - [Doppler + .env.local Fallback Pattern](doppler-env-local-pattern.md): Doppler as primary secrets source with .env.local offline fallback. RECOMMENDED.
+- [Pipe deploy secrets over SSH stdin to one remote command, and keep the owner credentials out of the long-running container](pipe-deploy-secrets-over-ssh-stdin.md): send filtered secrets from the secret manager over SSH stdin so nothing touches the host disk or a command line, and hand the schema owner's credentials only to a throwaway migrate container. RECOMMENDED.
