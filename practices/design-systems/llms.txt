@@ -7,3 +7,4 @@
 - [Guardrail-Driven Design System](guardrail-driven-design.md): Comprehensive design constraints document loaded as a reference file for all UI work. RECOMMENDED.
 - [OKLCH Token Architecture](oklch-token-architecture.md): OKLCH color space for perceptually uniform tokens with auto-derived accessible pairs. OPTIONAL.
 - [Laws of UX Reference for Code Review](laws-of-ux-code-review.md): 30 UX laws mapped to code-level indicators with dedicated review skill and agent. FOUNDATIONAL.
+- [One declarative map for a settings area: nav, home, breadcrumbs, search and access all derive from it](one-declarative-map-for-a-settings-area.md): describe every section, page, tab, named setting, access rule and former name once as data and project the nav, home cards, page header, search index and guards from it, so a reorganisation is a data edit and no surface can drift. RECOMMENDED.

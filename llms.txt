@@ -17,7 +17,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Claude Config index](practices/claude-config/llms.txt): CLAUDE.md structure, rules, hooks, skills, agents (9 entries)
 
 ### Testing
-- [Testing index](practices/testing/llms.txt): Vitest, Jest, Playwright, coverage patterns, and reproducing load-dependent flakes under forced CPU contention (9 entries)
+- [Testing index](practices/testing/llms.txt): Vitest, Jest, Playwright, coverage patterns, and reproducing load-dependent flakes under forced CPU contention (10 entries)
 
 ### Linting & Formatting
 - [Linting & Formatting index](practices/linting-formatting/llms.txt): Biome, ESLint, auto-format hooks (3 entries)
@@ -47,7 +47,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Documentation index](practices/documentation/llms.txt): Reference files, plan structure, investigation patterns (2 entries)
 
 ### Design Systems
-- [Design Systems index](practices/design-systems/llms.txt): OKLCH tokens, guardrails, UX laws review, iframe isolation (3 entries)
+- [Design Systems index](practices/design-systems/llms.txt): OKLCH tokens, guardrails, UX laws review, iframe isolation (4 entries)
 
 ### Environment
 - [Environment index](practices/environment/llms.txt): Doppler + .env.local, secrets encryption (1 entry)
