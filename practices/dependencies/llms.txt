@@ -5,3 +5,4 @@
 ## Entries
 
 - [Gate CI on npm audit --omit=dev and Remove Unused Dependencies Carrying Advisories](npm-audit-prod-ci-prune-unused.md): Fail CI on high/critical prod-tree advisories; when one lands, grep for actual usage first and delete unused packages instead of overriding. FOUNDATIONAL.
+- [Pin the exact version of a third-party script bundled into a page, and test the hash of what is bundled](hash-pin-the-third-party-script-in-a-generated-artifact.md): Pin a third-party script bundled into a self-contained page to an exact version and test the hash of the bundled file, so an upgrade is a deliberate edit. RECOMMENDED.

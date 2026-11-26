@@ -62,7 +62,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Database index](practices/database/llms.txt): Drizzle migrations, Postgres patterns, migration numbering discipline (3 entries)
 
 ### Dependencies
-- [Dependencies index](practices/dependencies/llms.txt): npm audit CI gating, unused-dependency pruning, supply-chain hygiene (1 entry)
+- [Dependencies index](practices/dependencies/llms.txt): npm audit CI gating, unused-dependency pruning, supply-chain hygiene (2 entries)
 
 ### Notifications
 - [Notifications index](practices/notifications/llms.txt): Multi-channel fan-out with per-channel failure isolation (1 entry)
