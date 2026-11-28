@@ -7,3 +7,4 @@
 - [Structured Logging with Winston](structured-logging-winston.md): JSON logging with timestamps, error stacks, default metadata, and child loggers. RECOMMENDED.
 
 - [Tenant lifecycle status checks at the auth-guard layer](lifecycle-status-check-at-guard-layer.md): Inject the write-block check into shared auth guards on mutating HTTP methods. Every existing route picks it up automatically; suspended/locked/archived tenants return 423 Locked without per-route changes. RECOMMENDED.
+- [A route reached by a native form post renders every refusal as a page](form-post-routes-render-every-refusal-as-a-page.md): for routes a browser reaches by submitting a form, the handler's errors, the router's own 405 and layer-level errors (body limit, rate limit, timeout, CSRF) all render as HTML pages, never raw JSON in a blank tab. RECOMMENDED.

@@ -23,7 +23,7 @@ OPTIONAL = nice-to-have improvements -- skip unless explicitly asked
 - [Linting & Formatting index](practices/linting-formatting/llms.txt): Biome, ESLint, auto-format hooks (3 entries)
 
 ### Error Handling
-- [Error Handling index](practices/error-handling/llms.txt): Structured logging, error context propagation (2 entries)
+- [Error Handling index](practices/error-handling/llms.txt): Structured logging, error context propagation (3 entries)
 
 ### LLM Resilience
 - [LLM Resilience index](practices/llm-resilience/llms.txt): Parsing non-strict LLM JSON, parse-only retry, fail-closed verification, and reconciling LLM self-assessments against deterministic checks (3 entries)
